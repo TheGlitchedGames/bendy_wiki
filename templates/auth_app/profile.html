@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Perfil de {{ profile_user.display_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ static('css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+
+    <!-- CABECERA DE PERFIL -->
+    <div class="profile-header-card" id="profileHeader">
+        <div class="profile-header-bg"></div>
+        <div class="profile-header-ink-overlay"></div>
+        <div class="profile-header-content">
+            <div class="profile-avatar-wrapper">
+                {% if profile_user.avatar %}
+                    <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}" class="profile-avatar">
+                {% else %}
+                    <div class="profile-avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
+                <div class="profile-role-badge role-{{ profile_user.role }}">
+                    {{ profile_user.get_role_display() }}
+                </div>
+            </div>
+            <div class="profile-header-info">
+                <h1 class="profile-username">{{ profile_user.display_name }}</h1>
+                <p class="profile-handle">@{{ profile_user.username }}</p>
+                {% if profile_user.bio %}
+                    <p class="profile-bio">{{ profile_user.bio }}</p>
+                {% endif %}
+                <div class="profile-meta d-flex flex-wrap gap-3 mt-2">
+                    <span class="profile-meta-item">
+                        <i class="fas fa-star me-1"></i>
+                        <strong>{{ profile_user.ink_points }}</strong> puntos de tinta
+                    </span>
+                    <span class="profile-meta-item">
+                        <i class="fas fa-gamepad me-1"></i>
+                        {{ profile_user.get_favorite_game_display() }}
+                    </span>
+                    <span class="profile-meta-item">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Desde {{ profile_user.joined_at.strftime('%B %Y') }}
+                    </span>
+                </div>
+            </div>
+            {% if is_own_profile %}
+            <div class="profile-actions ms-auto d-flex flex-column gap-2">
+                <a href="{{ url('bendy:profile_edit', args=[request.user.username]) }}" class="bendy-btn bendy-btn-primary">
+                    <i class="fas fa-edit me-2"></i>Editar perfil
+                </a>
+                <a href="{{ url('bendy:password_change', args=[request.user.username]) }}" class="bendy-btn bendy-btn-outline-sm">
+                    <i class="fas fa-key me-2"></i>Cambiar contraseña
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="row g-3 mt-3" id="profileStats">
+        <div class="col-6 col-md-3">
+            <div class="stat-card" data-count="{{ profile_user.ink_points }}">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-value counter-animate">{{ profile_user.ink_points }}</div>
+                <div class="stat-label">Puntos de Tinta</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Artículos editados</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Comentarios</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                <div class="stat-value">—</div>
+                <div class="stat-label">Rango</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFORMACIÓN DETALLADA -->
+    <div class="row g-4 mt-2">
+        <div class="col-lg-4">
+            <div class="profile-info-card">
+                <h3 class="profile-card-title"><i class="fas fa-info-circle me-2"></i>Información</h3>
+                <ul class="profile-info-list">
+                    <li>
+                        <span class="info-label">Nombre completo</span>
+                        <span class="info-value">{{ profile_user.get_full_name() or '—' }}</span>
+                    </li>
+                    <li>
+                        {% if is_own_profile %}
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ profile_user.email }}</span>
+                        {% endif %}
+                    </li>
+                    <li>
+                        <span class="info-label">Juego favorito</span>
+                        <span class="info-value">{{ profile_user.get_favorite_game_display() }}</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Rol</span>
+                        <span class="info-value role-badge-inline role-{{ profile_user.role }}">
+                            {{ profile_user.get_role_display() }}
+                        </span>
+                    </li>
+                    <li>
+                        <span class="info-label">Miembro desde</span>
+                        <span class="info-value">{{ profile_user.joined_at.strftime('%d/%m/%Y') }}</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Última actividad</span>
+                        <span class="info-value">
+                            {% if profile_user.last_login %}
+                                {{ profile_user.last_login.strftime('%d/%m/%Y') }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="profile-info-card">
+                <h3 class="profile-card-title"><i class="fas fa-scroll me-2"></i>Actividad reciente</h3>
+                <div class="activity-empty">
+                    <div class="activity-empty-icon">
+                        <i class="fas fa-ink-bottle"></i>
+                    </div>
+                    <p>Aún no hay actividad registrada para este usuario.</p>
+                    {% if is_own_profile %}
+                        <a href="#" class="bendy-btn bendy-btn-outline-sm mt-2">
+                            <i class="fas fa-edit me-2"></i>Empieza a contribuir
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_own_profile %}
+    <!-- ZONA DE PELIGRO -->
+    <div class="danger-zone mt-4">
+        <h3 class="danger-zone-title"><i class="fas fa-exclamation-triangle me-2"></i>Zona de peligro</h3>
+        <div class="danger-zone-content">
+            <div>
+                <strong>Eliminar cuenta</strong>
+                <p class="mb-0 text-muted">Una vez eliminada, no podrá recuperarse.</p>
+            </div>
+            <a href="{{ url('bendy:delete_account') }}" class="bendy-btn bendy-btn-danger">
+                <i class="fas fa-trash-alt me-2"></i>Eliminar mi cuenta
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ static('js/profile.js') }}"></script>
+{% endblock %}

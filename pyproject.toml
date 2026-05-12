@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bendy-wiki"
+version = "1.0.0"
+description = "Wiki no oficial de Bendy and the Ink Machine y Bendy and the Dark Revival"
+readme = "README.md"
+requires-python = ">=3.14"
+license = { text = "MIT" }
+authors = [
+    { name = "Gustavo Almonacid Laborda" }
+]
+keywords = ["django", "wiki", "bendy", "ink-machine"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Framework :: Django :: 5.2",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+]
+
+dependencies = [
+    "django>=5.2",
+    "jinja2>=3.1.4",
+    "sweetify>=2.3.1",
+    "django-crispy-forms>=2.3",
+    "crispy-bootstrap5>=2024.10",
+    "pillow>=11.1.0",
+    "python-decouple>=3.8",
+    "django-extensions>=3.2.3",
+    "whitenoise>=6.8.2",
+    "django-widget-tweaks>=1.5.0",
+    "django-allauth>=65.3.0",
+    "psycopg2>=2.9.12",
+    "psycopg2-binary>=2.9.12",
+    "pyrefly>=0.45.0",
+    "aiosmtpd>=1.4.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyrefly>=0.17.0",
+    "django-debug-toolbar>=4.4.6",
+    "factory-boy>=3.3.1",
+    "coverage>=7.6.10"
+]
+
+[dependency-group]
+dev = [
+    "pyrefly>=0.17.0",
+    "django-debug-toolbar>=4.4.6",
+    "factory-boy>=3.3.1",
+    "coverage>=7.6.10",
+]
+
+[tool.pyrefly]
+project_includes = ["."]
+search_path = ["."]
+python_version = "3.14"
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["bendy_wiki", "apps"]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "manage.py",
+    "*/settings/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false

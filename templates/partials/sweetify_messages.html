@@ -1,0 +1,26 @@
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for message in get_messages(request) %}
+        {% set tag = message.tags %}
+        Swal.fire({
+            title: "{{ message.extra_tags.title if message.extra_tags and message.extra_tags.title else '' }}",
+            text: "{{ message|string }}",
+            icon: "{% if 'success' in tag %}success{% elif 'error' in tag %}error{% elif 'warning' in tag %}warning{% else %}info{% endif %}",
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            background: '#1a1007',
+            color: '#f5e6c8',
+            iconColor: '#d4aa47',
+            customClass: {
+                popup: 'bendy-toast-popup',
+                title: 'bendy-toast-title',
+            }
+        });
+    {% endfor %}
+});
+</script>
+{% endif %}
