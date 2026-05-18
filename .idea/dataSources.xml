@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="bendy_db@localhost" uuid="ce4d77d8-8102-44f3-8a1f-041979fb642a">
+    <data-source source="LOCAL" name="bendy_db@localhost" uuid="b12eb8f4-dc3f-4d86-a388-350d9a5b0da9">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
