@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'django_filters',
 
     # Local apps
     'bendy_app.apps.BendyAppConfig',
@@ -102,12 +103,15 @@ WSGI_APPLICATION = 'bendy_wiki.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        "NAME": config("DB_NAME", default="bendy-wiki"),
+        'ENGINE': 'django.db.backends.mysql',
+        "NAME": config("DB_NAME", default="bendy_db"),
         "USER": config("DB_USER", default="gusalmonacid"),
         "PASSWORD": config("DB_PASSWORD"),
         "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432")
+        "PORT": config("DB_PORT", default="3306"),
+        "OPTIONS": {
+            "charset": "utf8mb4"
+        }
     }
 }
 

@@ -1,18 +1,17 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres
+  mysql:
+    image: mysql
     container_name: bendy_db
     restart: always
     environment:
-      POSTGRES_DB: bendy_db
-      POSTGRES_USER: gusalmonacid
-      POSTGRES_PASSWORD: Cala_Underplayer2004
+      MYSQL_DATABASE: bendy_db
+      MYSQL_USER: gusalmonacid
+      MYSQL_PASSWORD: Cala_Underplayer2004
+      MYSQL_ROOT_PASSWORD: Cala_Underplayer2004
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  postgres_data:
+  mysql_data:

@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ character.name }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-characters.css' %}">
+{% endblock %}
+
+{% block container_class %}container-fluid px-0{% endblock %}
+
+{% block content %}
+
+    {# ── HERO DEL PERSONAJE ──────────────────────────────────────────────────── #}
+    <header class="char-detail-hero">
+        <div class="char-detail-hero-bg"></div>
+
+        {# Imagen de fondo difuminada #}
+        {% if character.image %}
+            <div class="char-detail-hero-img-bg"
+                 style="background-image: url('{{ character.image.url }}')"></div>
+        {% endif %}
+
+        <div class="container position-relative py-5">
+
+            {# Breadcrumb #}
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="char-breadcrumb">
+                    <li><a href="{% url 'bendy:index' %}"><i class="fas fa-home"></i></a></li>
+                    <li><i class="fas fa-chevron-right"></i></li>
+                    <li><a href="{% url 'bendy:character_list' %}">Personajes</a></li>
+                    <li><i class="fas fa-chevron-right"></i></li>
+                    <li class="active">{{ character.name }}</li>
+                </ol>
+            </nav>
+
+            <div class="char-detail-hero-content">
+
+                {# Imagen principal #}
+                <div class="char-detail-portrait">
+                    {% if character.image %}
+                        <img src="{{ character.image.url }}" alt="{{ character.name }}"
+                             class="char-detail-portrait-img">
+                    {% else %}
+                        <div class="char-detail-portrait-placeholder">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Info principal #}
+                <div class="char-detail-intro">
+
+                    {# Badges de clasificación #}
+                    <div class="char-detail-badges mb-3">
+          <span class="char-badge char-badge--game char-badge--{{ character.game }}">
+            <i class="fas fa-film me-1"></i>{{ character.get_game_display }}
+          </span>
+                        <span class="char-badge char-badge--role char-badge--{{ character.role }}">
+            {{ character.get_role_display }}
+          </span>
+                        <span class="char-badge char-badge--type">
+            {{ character.get_character_type_display }}
+          </span>
+                        {% if character.is_playable %}
+                            <span class="char-badge char-badge--playable">
+              <i class="fas fa-gamepad me-1"></i>Jugable
+            </span>
+                        {% endif %}
+                    </div>
+
+                    <h1 class="char-detail-name">{{ character.name }}</h1>
+
+                    {% if character.alias %}
+                        <p class="char-detail-alias">
+                            <i class="fas fa-quote-left me-1"></i>{{ character.alias }}
+                        </p>
+                    {% endif %}
+
+                    {# Datos rápidos #}
+                    <dl class="char-detail-quickfacts">
+                        {% if character.human_counterpart %}
+                            <div class="char-qf-item">
+                                <dt><i class="fas fa-user me-1"></i>Contraparte humana</dt>
+                                <dd>{{ character.human_counterpart }}</dd>
+                            </div>
+                        {% endif %}
+                        {% if character.real_world_inspiration %}
+                            <div class="char-qf-item">
+                                <dt><i class="fas fa-lightbulb me-1"></i>Inspiración</dt>
+                                <dd>{{ character.real_world_inspiration }}</dd>
+                            </div>
+                        {% endif %}
+                        {% if character.appears_in_chapters %}
+                            <div class="char-qf-item">
+                                <dt><i class="fas fa-book-open me-1"></i>Capítulos</dt>
+                                <dd>{{ character.appears_in_chapters }}</dd>
+                            </div>
+                        {% endif %}
+                        {% if character.is_alive_end is not None %}
+                            <div class="char-qf-item">
+                                <dt><i class="fas fa-heartbeat me-1"></i>¿Sobrevive?</dt>
+                                <dd>
+                                    {% if character.is_alive_end %}
+                                        <span class="char-status char-status--alive">
+                    <i class="fas fa-check-circle me-1"></i>Sí
+                  </span>
+                                    {% elif character.is_alive_end == False %}
+                                        <span class="char-status char-status--dead">
+                    <i class="fas fa-times-circle me-1"></i>No
+                  </span>
+                                    {% else %}
+                                        <span class="char-status char-status--unknown">
+                    <i class="fas fa-question-circle me-1"></i>Incierto
+                  </span>
+                                    {% endif %}
+                                </dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    {# ── CONTENIDO PRINCIPAL ─────────────────────────────────────────────────── #}
+    <div class="container py-5">
+        <div class="row g-4">
+
+            {# Columna principal #}
+            <div class="col-lg-8">
+
+                {# Descripción general #}
+                {% if character.description %}
+                    <section class="char-section">
+                        <h2 class="char-section-title">
+                            <i class="fas fa-scroll me-2"></i>Descripción
+                        </h2>
+                        <div class="char-section-body">
+                            <p>{{ character.description|linebreaksbr }}</p>
+                        </div>
+                    </section>
+                {% endif %}
+
+                {# Apariencia #}
+                {% if character.appearance %}
+                    <section class="char-section">
+                        <h2 class="char-section-title">
+                            <i class="fas fa-eye me-2"></i>Apariencia
+                        </h2>
+                        <div class="char-section-body">
+                            <p>{{ character.appearance|linebreaksbr }}</p>
+                        </div>
+                    </section>
+                {% endif %}
+
+                {# Personalidad #}
+                {% if character.personality %}
+                    <section class="char-section">
+                        <h2 class="char-section-title">
+                            <i class="fas fa-brain me-2"></i>Personalidad
+                        </h2>
+                        <div class="char-section-body">
+                            <p>{{ character.personality|linebreaksbr }}</p>
+                        </div>
+                    </section>
+                {% endif %}
+
+                {# Trasfondo #}
+                {% if character.background %}
+                    <section class="char-section">
+                        <h2 class="char-section-title">
+                            <i class="fas fa-history me-2"></i>Trasfondo
+                        </h2>
+                        <div class="char-section-body">
+                            <p>{{ character.background|linebreaksbr }}</p>
+                        </div>
+                    </section>
+                {% endif %}
+
+                {# Cita icónica #}
+                {% if character.iconic_quote %}
+                    <section class="char-section">
+                        <blockquote class="char-quote">
+                            <div class="char-quote-marks"><i class="fas fa-quote-left"></i></div>
+                            <p class="char-quote-text">{{ character.iconic_quote }}</p>
+                            {% if character.quote_source %}
+                                <footer class="char-quote-source">— {{ character.quote_source }}</footer>
+                            {% endif %}
+                        </blockquote>
+                    </section>
+                {% endif %}
+
+            </div>
+            {# /col-lg-8 #}
+
+
+            {# Columna lateral #}
+            <div class="col-lg-4">
+
+                {# Ficha técnica #}
+                <div class="char-sidebar-card">
+                    <h3 class="char-sidebar-title">
+                        <i class="fas fa-id-card me-2"></i>Ficha del personaje
+                    </h3>
+                    <ul class="char-sidebar-list">
+
+                        <li>
+                            <span class="char-sidebar-label">Juego</span>
+                            <span class="char-sidebar-value">
+              <span class="char-badge char-badge--game char-badge--{{ character.game }}">
+                {{ character.get_game_display }}
+              </span>
+            </span>
+                        </li>
+
+                        <li>
+                            <span class="char-sidebar-label">Rol</span>
+                            <span class="char-sidebar-value">
+              <span class="char-badge char-badge--role char-badge--{{ character.role }}">
+                {{ character.get_role_display }}
+              </span>
+            </span>
+                        </li>
+
+                        <li>
+                            <span class="char-sidebar-label">Tipo</span>
+                            <span class="char-sidebar-value char-badge char-badge--type">
+              {{ character.get_character_type_display }}
+            </span>
+                        </li>
+
+                        {% if character.human_counterpart %}
+                            <li>
+                                <span class="char-sidebar-label">Contraparte humana</span>
+                                <span class="char-sidebar-value">{{ character.human_counterpart }}</span>
+                            </li>
+                        {% endif %}
+
+                        {% if character.real_world_inspiration %}
+                            <li>
+                                <span class="char-sidebar-label">Inspiración</span>
+                                <span class="char-sidebar-value">{{ character.real_world_inspiration }}</span>
+                            </li>
+                        {% endif %}
+
+                        {% if character.voice_actor_batim %}
+                            <li>
+                                <span class="char-sidebar-label">Voz BATIM</span>
+                                <span class="char-sidebar-value">{{ character.voice_actor_batim }}</span>
+                            </li>
+                        {% endif %}
+
+                        {% if character.voice_actor_batdr %}
+                            <li>
+                                <span class="char-sidebar-label">Voz BATDR</span>
+                                <span class="char-sidebar-value">{{ character.voice_actor_batdr }}</span>
+                            </li>
+                        {% endif %}
+
+                        {% if character.appears_in_chapters %}
+                            <li>
+                                <span class="char-sidebar-label">Capítulos</span>
+                                <span class="char-sidebar-value">{{ character.appears_in_chapters }}</span>
+                            </li>
+                        {% endif %}
+
+                        <li>
+                            <span class="char-sidebar-label">Jugable</span>
+                            <span class="char-sidebar-value">
+              {% if character.is_playable %}
+                  <span class="char-status char-status--alive">
+                  <i class="fas fa-check-circle me-1"></i>Sí
+                </span>
+              {% else %}
+                  <span class="char-status char-status--dead">
+                  <i class="fas fa-times-circle me-1"></i>No
+                </span>
+              {% endif %}
+            </span>
+                        </li>
+
+                        <li>
+                            <span class="char-sidebar-label">Criatura de tinta</span>
+                            <span class="char-sidebar-value">
+              {% if character.is_ink_creature %}
+                  <span class="char-status char-status--alive"><i class="fas fa-check-circle me-1"></i>Sí</span>
+              {% else %}
+                  <span class="char-status char-status--dead"><i class="fas fa-times-circle me-1"></i>No</span>
+              {% endif %}
+            </span>
+                        </li>
+
+                    </ul>
+                </div>
+                {# /ficha #}
+
+                {# Volver al listado #}
+                <div class="mt-3">
+                    <a href="{% url 'bendy:character_list' %}" class="bendy-btn bendy-btn-ghost bendy-btn-full">
+                        <i class="fas fa-arrow-left me-1"></i> Volver a Personajes
+                    </a>
+                </div>
+
+            </div>
+            {# /col-lg-4 #}
+        </div>
+        {# /row #}
+
+
+        {# ── PERSONAJES RELACIONADOS ─────────────────────────────────────────────── #}
+        {% if related_characters %}
+            <section class="mt-5">
+                <div class="text-center mb-4">
+                    <p class="section-eyebrow">Del mismo universo</p>
+                    <h2 class="section-title">Personajes relacionados</h2>
+                    <div class="section-divider"><i class="fas fa-star"></i></div>
+                </div>
+
+                <div class="char-related-grid">
+                    {% for rel in related_characters %}
+                        <a href="{% url 'bendy:character_detail' rel.slug %}" class="char-related-card">
+                            <div class="char-related-img">
+                                {% if rel.image %}
+                                    <img data-src="{{ rel.image.url }}"
+                                         src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+                                         alt="{{ rel.name }}" loading="lazy">
+                                {% else %}
+                                    <i class="fas fa-user-secret"></i>
+                                {% endif %}
+                            </div>
+                            <div class="char-related-info">
+                                <span class="char-related-name">{{ rel.name }}</span>
+                                <span class="char-badge char-badge--role char-badge--{{ rel.role }} mt-1">
+                {{ rel.get_role_display }}
+              </span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+    </div>{# /container #}
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/bendy-characters.js' %}"></script>
+{% endblock %}

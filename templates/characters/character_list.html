@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Personajes{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-characters.css' %}">
+{% endblock %}
+
+{% block container_class %}container-fluid px-0{% endblock %}
+
+{% block content %}
+
+    {# ── PAGE HEADER ──────────────────────────────────────────────────────────── #}
+    <header class="char-page-header">
+        <div class="char-header-bg"></div>
+        <div class="container position-relative py-5">
+            <p class="page-eyebrow">
+                <i class="fas fa-scroll me-1"></i> Archivo del Estudio
+            </p>
+            <h1 class="char-header-title">Personajes</h1>
+            <p class="char-header-desc">
+                Todos los habitantes del Estudio de Tinta — héroes, villanos y criaturas de ambos juegos.
+            </p>
+
+            {# Pills de conteo por juego #}
+            <div class="char-game-pills mt-3">
+      <span class="char-game-pill char-game-pill--batim">
+        <i class="fas fa-film me-1"></i> BATIM
+        <span class="char-pill-count">{{ batim_count }}</span>
+      </span>
+                <span class="char-game-pill char-game-pill--batdr">
+        <i class="fas fa-ghost me-1"></i> BATDR
+        <span class="char-pill-count">{{ batdr_count }}</span>
+      </span>
+            </div>
+        </div>
+    </header>
+
+    {# ── TOOLBAR ──────────────────────────────────────────────────────────────── #}
+    <div class="container py-3">
+        <div class="char-toolbar">
+
+            {# Búsqueda rápida inline #}
+            <form method="get" class="char-search-form" id="quickSearchForm">
+                {# Preserve all other filters #}
+                {% for key, val in request.GET.items %}
+                    {% if key != 'name' and key != 'page' %}
+                        <input type="hidden" name="{{ key }}" value="{{ val }}">
+                    {% endif %}
+                {% endfor %}
+                <div class="char-search-wrapper">
+                    <i class="fas fa-search char-search-icon"></i>
+                    <input
+                            type="text"
+                            name="name"
+                            value="{{ request.GET.name }}"
+                            class="bendy-input char-search-input"
+                            placeholder="Buscar personaje..."
+                            autocomplete="off"
+                            id="quickSearch"
+                    >
+                    {% if request.GET.name %}
+                        <a href="?
+                                {% for k,v in request.GET.items %}{% if k != 'name' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
+                           class="char-search-clear" title="Limpiar">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            {# Resultados y acciones #}
+            <div class="char-toolbar-right">
+      <span class="char-result-count">
+        <i class="fas fa-users me-1"></i>
+        <strong>{{ total_count }}</strong> personaje{{ total_count|pluralize }}
+      </span>
+
+                {# Botón filtro avanzado #}
+                <button class="bendy-btn bendy-btn-ghost" id="openFilterModal" type="button">
+                    <i class="fas fa-sliders-h me-1"></i> Filtros
+                    {% if has_active_filters %}
+                        <span class="char-filter-badge">●</span>
+                    {% endif %}
+                </button>
+
+                {# Limpiar todos los filtros #}
+                {% if has_active_filters %}
+                    <a href="{% url 'bendy:character_list' %}" class="bendy-btn bendy-btn-outline-sm">
+                        <i class="fas fa-times me-1"></i> Limpiar
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Pills de filtros activos #}
+        {% if active_filters %}
+            <div class="char-active-filters mt-2">
+                {% for f in active_filters %}
+                    <span class="char-active-pill">
+          <span class="char-active-pill-label">{{ f.label }}:</span>
+          <span class="char-active-pill-value">{{ f.value }}</span>
+          <a href="?
+                  {% for k,v in request.GET.items %}{% if k != f.key and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
+             class="char-active-pill-remove" title="Quitar filtro">
+            <i class="fas fa-times"></i>
+          </a>
+        </span>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# ── GRID DE PERSONAJES ───────────────────────────────────────────────────── #}
+    <div class="container pb-5">
+
+        {% if characters %}
+            <div class="char-grid" id="characterGrid">
+                {% for char in characters %}
+                    <article class="char-card" data-game="{{ char.game }}">
+                        <a href="{% url 'bendy:character_detail' char.slug %}" class="char-card-link">
+
+                            {# Imagen #}
+                            <div class="char-card-img-wrapper">
+                                {% if char.image %}
+                                    <img
+                                            data-src="{{ char.image.url }}"
+                                            src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+                                            alt="{{ char.name }}"
+                                            class="char-card-img"
+                                            loading="lazy"
+                                    >
+                                {% else %}
+                                    <div class="char-card-img-placeholder">
+                                        <i class="fas fa-user-secret"></i>
+                                    </div>
+                                {% endif %}
+
+                                {# Overlay con badges #}
+                                <div class="char-card-overlay">
+                <span class="char-badge char-badge--game char-badge--{{ char.game }}">
+                  {{ char.get_game_display }}
+                </span>
+                                </div>
+                            </div>
+
+                            {# Info #}
+                            <div class="char-card-body">
+                                <h2 class="char-card-name">{{ char.name }}</h2>
+                                {% if char.alias %}
+                                    <p class="char-card-alias">{{ char.alias|truncatechars:40 }}</p>
+                                {% endif %}
+
+                                <div class="char-card-meta">
+                <span class="char-badge char-badge--role char-badge--{{ char.role }}">
+                  {{ char.get_role_display }}
+                </span>
+                                    <span class="char-badge char-badge--type">
+                  {{ char.get_character_type_display }}
+                </span>
+                                </div>
+
+                                {% if char.is_playable %}
+                                    <div class="char-card-playable">
+                                        <i class="fas fa-gamepad me-1"></i> Jugable
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
+
+            {# ── PAGINACIÓN #}
+            {% if is_paginated %}
+                <nav class="mt-5 d-flex justify-content-center" aria-label="Páginas de personajes">
+                    <ul class="pagination bendy-pagination gap-1">
+
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link bendy-page-link"
+                                   href="?
+                                           {% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link bendy-page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link bendy-page-link"
+                                       href="?
+                                               {% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link bendy-page-link"
+                                   href="?
+                                           {% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            {% endif %}
+
+        {% else %}
+            {# Estado vacío #}
+            <div class="char-empty-state">
+                <div class="char-empty-icon">
+                    <i class="fas fa-ghost"></i>
+                </div>
+                <h3 class="char-empty-title">Ningún personaje encontrado</h3>
+                <p class="char-empty-desc">
+                    Los pasillos del estudio están vacíos con estos filtros.
+                    Prueba a ajustar la búsqueda.
+                </p>
+                <a href="{% url 'bendy:character_list' %}" class="bendy-btn bendy-btn-primary mt-3">
+                    <i class="fas fa-redo me-1"></i> Ver todos los personajes
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+
+
+    {# ═══════════════════════════════════════════════════════════════════════════ #}
+    {# MODAL DE FILTROS AVANZADOS                                                  #}
+    {# ═══════════════════════════════════════════════════════════════════════════ #}
+    <div class="char-filter-modal-backdrop" id="filterModalBackdrop" aria-hidden="true"></div>
+
+    <aside class="char-filter-modal" id="filterModal" role="dialog" aria-modal="true"
+           aria-labelledby="filterModalTitle">
+
+        {# Header del modal #}
+        <div class="char-filter-modal-header">
+            <div>
+                <h2 class="char-filter-modal-title" id="filterModalTitle">
+                    <i class="fas fa-sliders-h me-2"></i>Filtros avanzados
+                </h2>
+                <p class="char-filter-modal-subtitle">Afina tu búsqueda en el Estudio de Tinta</p>
+            </div>
+            <button class="char-filter-modal-close" id="closeFilterModal" aria-label="Cerrar filtros">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        {# Formulario de filtros #}
+        <form method="get" action="{% url 'bendy:character_list' %}" class="char-filter-form"
+              id="filterForm">
+
+            <div class="char-filter-modal-body">
+
+                {# Búsqueda por nombre #}
+                <div class="char-filter-group">
+                    <label class="bendy-label" for="id_name">
+                        <i class="fas fa-search me-1"></i> Nombre del personaje
+                    </label>
+                    {{ filterset.form.name }}
+                </div>
+
+                {# Selector de juego #}
+                <div class="char-filter-group">
+                    <label class="bendy-label" for="id_game">
+                        <i class="fas fa-gamepad me-1"></i> Juego
+                    </label>
+                    {{ filterset.form.game }}
+                </div>
+
+                {# Selector de rol #}
+                <div class="char-filter-group">
+                    <label class="bendy-label" for="id_role">
+                        <i class="fas fa-mask me-1"></i> Rol en la historia
+                    </label>
+                    {{ filterset.form.role }}
+                </div>
+
+                {# Tipo de personaje #}
+                <div class="char-filter-group">
+                    <label class="bendy-label" for="id_character_type">
+                        <i class="fas fa-dna me-1"></i> Tipo de personaje
+                    </label>
+                    {{ filterset.form.character_type }}
+                </div>
+
+                {# Ordenación #}
+                <div class="char-filter-group">
+                    <label class="bendy-label" for="id_ordering">
+                        <i class="fas fa-sort me-1"></i> Ordenar por
+                    </label>
+                    {{ filterset.form.ordering }}
+                </div>
+
+                {# Checkboxes en fila #}
+                <div class="char-filter-checks">
+                    <label class="char-filter-check-label">
+                        <input type="checkbox" name="is_playable" value="true"
+                               class="bendy-checkbox"
+                               {% if request.GET.is_playable %}checked{% endif %}>
+                        <span>
+            <i class="fas fa-gamepad me-1 text-warning"></i>
+            Solo jugables
+          </span>
+                    </label>
+                    <label class="char-filter-check-label">
+                        <input type="checkbox" name="is_alive_end" value="true"
+                               class="bendy-checkbox"
+                               {% if request.GET.is_alive_end %}checked{% endif %}>
+                        <span>
+            <i class="fas fa-heart me-1" style="color:#27ae60"></i>
+            Sobrevive al final
+          </span>
+                    </label>
+                </div>
+
+            </div>
+            {# /body #}
+
+            {# Footer del modal #}
+            <div class="char-filter-modal-footer">
+                <a href="{% url 'bendy:character_list' %}" class="bendy-btn bendy-btn-ghost">
+                    <i class="fas fa-times me-1"></i> Limpiar todo
+                </a>
+                <button type="submit" class="bendy-btn bendy-btn-primary">
+                    <i class="fas fa-filter me-1"></i> Aplicar filtros
+                </button>
+            </div>
+
+        </form>
+    </aside>
+
+{% endblock %}
+
+
+{% block extra_js %}
+    <script src="{% static 'js/bendy-characters.js' %}"></script>
+{% endblock %}

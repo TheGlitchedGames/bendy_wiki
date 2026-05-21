@@ -10,5 +10,5 @@ whitenoise>=6.8.2
 django-widget-tweaks>=1.5.0
 django-allauth>=65.3.0
 aiosmtpd>=1.4.6
-psycopg2>=2.9.12
-psycopg2-binary>=2.9.12
+mysqlclient>=2.2.0
+django-filter>=25.2

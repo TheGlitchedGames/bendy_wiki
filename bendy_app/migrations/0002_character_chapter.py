@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 ('new_characters_introduced', models.TextField(blank=True, help_text='Lista de personajes que aparecen por primera vez en este capítulo', verbose_name='Nuevos personajes introducidos')),
                 ('key_events', models.TextField(blank=True, help_text='Los momentos más importantes del capítulo', verbose_name='Eventos clave')),
                 ('lore_revelations', models.TextField(blank=True, help_text='Información nueva sobre la historia del mundo que se descubre en este capítulo', verbose_name='Revelaciones de trasfondo')),
-                ('soundtrac_notes', models.CharField(blank=True, verbose_name='Notas sobre la banda sonora')),
+                ('soundtrac_notes', models.CharField(blank=True, max_length=255, verbose_name='Notas sobre la banda sonora')),
                 ('composer', models.CharField(blank=True, default='theMealty', max_length=100, verbose_name='Compositor')),
                 ('cover_image', models.ImageField(blank=True, null=True, upload_to='chapters/', verbose_name='Imagen de portada')),
                 ('background_image', models.ImageField(blank=True, null=True, upload_to='chapters/backgrounds/', verbose_name='Imagen de fondo')),

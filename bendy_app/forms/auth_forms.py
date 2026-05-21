@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, \
     PasswordChangeForm
 from django.utils.translation import gettext_lazy as _
 
-from .models import BendyUser
+from bendy_app.models import BendyUser
 
 
 class BendyLoginForm(AuthenticationForm):
