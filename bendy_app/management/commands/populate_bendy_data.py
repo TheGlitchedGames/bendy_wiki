@@ -1,6 +1,6 @@
 """
-Comando de gestión Django para poblar la base de datos con personajes y capítulos
-de Bendy and the Ink Machine (BATIM) y Bendy and the Dark Revival (BATDR).
+Comando de gestión Django para poblar la base de datos con juegos, personajes
+y capítulos de Bendy and the Ink Machine (BATIM) y Bendy and the Dark Revival (BATDR).
 
 Uso:
     python manage.py populate_bendy_data
@@ -10,16 +10,49 @@ Uso:
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
-# Ajusta estos imports a la ruta real de tus modelos
-# from wiki.models import Character, Chapter
 
+# ── Datos de los juegos ───────────────────────────────────────────────────────
+
+GAMES_DATA: list[dict] = [
+    {
+        "key": "batim",
+        "title": "Bendy and the Ink Machine",
+        "release_year": 2017,
+        "slug": "bendy-and-the-ink-machine",
+        "short_description": (
+            "Juego de terror y aventura en primera persona ambientado en un estudio de animación "
+            "de los años 60 infestado de criaturas de tinta. Protagonizado por Henry Stein, un "
+            "exanimador que regresa al estudio décadas después de haberlo abandonado."
+        ),
+    },
+    {
+        "key": "batdr",
+        "title": "Bendy and the Dark Revival",
+        "release_year": 2022,
+        "slug": "bendy-and-the-dark-revival",
+        "short_description": (
+            "Secuela espiritual de BATIM. Una joven llamada Audrey es arrastrada al Estudio Oscuro "
+            "y debe sobrevivir a sus horrores mientras descubre la verdad sobre su propio origen "
+            "y su vínculo con Joey Drew."
+        ),
+    },
+]
+
+
+# ── Datos de los personajes ───────────────────────────────────────────────────
+# Campos de FK / M2M:
+#   primary_game_key  → clave del juego principal  (str: "batim" | "batdr")
+#   extra_game_keys   → lista de claves adicionales (list[str], puede estar vacía)
+# El antiguo campo `game` con valor "both" se convierte ahora en:
+#   primary_game_key = juego más representativo + extra_game_keys = [el otro]
 
 CHARACTERS_DATA: list[dict] = [
-    # ── PERSONAJES DE BATIM ────────────────────────────────────────────────────
+    # ── BATIM ─────────────────────────────────────────────────────────────────
     {
         "name": "Bendy",
         "alias": "Bendy the Dancing Demon, Ink Bendy, Ink Demon, The Beast Bendy",
-        "game": "both",
+        "primary_game_key": "batim",
+        "extra_game_keys": ["batdr"],
         "role": "antagonist",
         "character_type": "ink_monster",
         "description": (
@@ -45,7 +78,7 @@ CHARACTERS_DATA: list[dict] = [
         ),
         "background": (
             "Creado por Joey Drew como mascota del estudio en los años 20, Bendy protagonizó "
-            "cortos animados durante décadas. Joey Drew obsesionado con dar vida a sus personajes, "
+            "cortos animados durante décadas. Joey Drew, obsesionado con dar vida a sus personajes, "
             "usó la Máquina de Tinta para intentar traer a Bendy a la vida. El resultado fue el "
             "Ink Demon, una entidad defectuosa sin alma que aterroriza el estudio."
         ),
@@ -63,7 +96,8 @@ CHARACTERS_DATA: list[dict] = [
     {
         "name": "Henry Stein",
         "alias": "Henry",
-        "game": "batim",
+        "primary_game_key": "batim",
+        "extra_game_keys": [],
         "role": "protagonist",
         "character_type": "human",
         "description": (
@@ -95,7 +129,8 @@ CHARACTERS_DATA: list[dict] = [
     {
         "name": "Joey Drew",
         "alias": "Mr. Drew",
-        "game": "both",
+        "primary_game_key": "batim",
+        "extra_game_keys": ["batdr"],
         "role": "antagonist",
         "character_type": "human",
         "description": (
@@ -120,7 +155,6 @@ CHARACTERS_DATA: list[dict] = [
             "a construir la Máquina de Tinta y a realizar rituales usando las almas de sus "
             "trabajadores. Es el arquitecto del Ciclo en el que están atrapados todos los personajes."
         ),
-        "human_counterpart": "",
         "appears_in_chapters": "5 (BATIM, presencia física) | Mencionado en todos",
         "iconic_quote": "Henry, come visit the old workshop. There's something I need to show you.",
         "quote_source": "Carta de Joey Drew, inicio de BATIM",
@@ -130,7 +164,8 @@ CHARACTERS_DATA: list[dict] = [
     {
         "name": "Boris the Wolf",
         "alias": "Buddy Boris, Boris",
-        "game": "batim",
+        "primary_game_key": "batim",
+        "extra_game_keys": [],
         "role": "ally",
         "character_type": "toon",
         "description": (
@@ -141,8 +176,7 @@ CHARACTERS_DATA: list[dict] = [
         ),
         "appearance": (
             "Lobo antropomórfico alto con overol amarillo, zapatos negros, guantes amarillos "
-            "y orejas puntiagudas. Tiene mejillas negras y pecas en el hocico. "
-            "Es el más alto de todas las criaturas del estudio."
+            "y orejas puntiagudas. Tiene mejillas negras y pecas en el hocico."
         ),
         "personality": (
             "Amable, leal y valiente. A pesar de su imponente tamaño es un personaje gentil "
@@ -159,756 +193,552 @@ CHARACTERS_DATA: list[dict] = [
     {
         "name": "Twisted Alice",
         "alias": "Alice Angel, Alice, Susie",
-        "game": "both",
+        "primary_game_key": "batim",
+        "extra_game_keys": ["batdr"],
         "role": "secondary_antagonist",
         "character_type": "ink_monster",
         "description": (
             "Twisted Alice es la forma corrompida de Susie Campbell, la actriz de voz original "
-            "de Alice Angel, cuya alma fue atrapada en la Máquina de Tinta por Joey Drew. "
-            "Obsesionada con ser 'perfecta' y hermosa, utiliza a Henry en el Capítulo 3 para "
-            "conseguir partes de otras criaturas con las que mejorar su cuerpo. Es la antagonista "
-            "principal de los capítulos 3 y 4 de BATIM y reaparece en BATDR."
+            "de Alice Angel, quien fue absorbida por la Máquina de Tinta. Obsesionada con su "
+            "propia belleza y perfección, captura a otros seres del estudio para robarles sus "
+            "partes y volverse más 'perfecta'. En BATIM actúa como antagonista del capítulo 3 "
+            "y 4. En BATDR aparece en una forma diferente y menos dominante."
         ),
         "appearance": (
-            "Figura humanoide con cabello negro a la altura de los hombros, cejas finas y "
-            "labios negros. Lleva un vestido negro y pajarita blanca idéntica a la de Bendy. "
-            "Tiene halo de ángel y cuernos cortos simultáneamente. La mitad de su cara tiene "
-            "aspecto de cadáver. Lleva guantes blancos con un agujero en la palma."
+            "Mitad ángel animada, mitad monstruo de tinta. La mitad derecha de su cuerpo "
+            "mantiene la apariencia estilizada de Alice Angel; la izquierda es una masa deforme "
+            "de tinta negra con un ojo enorme y una pierna mecánica improvisada."
         ),
         "personality": (
-            "Manipuladora, cruel y vanidosa. Finge amabilidad para conseguir lo que quiere "
-            "y no duda en traicionar a quienes la ayudan. Su obsesión con la perfección "
-            "y la belleza es su rasgo más definitorio."
+            "Narcisista, manipuladora y cruel. Usa una fachada de amabilidad y encanto para "
+            "conseguir lo que quiere, revelando su verdadera naturaleza brutal cuando no obtiene "
+            "lo que desea."
         ),
-        "human_counterpart": "Susie Campbell (actriz de voz)",
-        "real_world_inspiration": "Betty Boop (Fleischer Studios)",
-        "voice_actor_batim": "Courtney Shaw",
-        "appears_in_chapters": "3, 4 (BATIM) | BATDR (antagonista secundaria)",
-        "iconic_quote": (
-            "I was reborn with my perfection stolen from me. To get it back, "
-            "I'll rip this rotted world apart. Angels are beautiful. Angels are beautiful."
-        ),
+        "human_counterpart": "Susie Campbell",
+        "real_world_inspiration": "Betty Boop (Fleischer Studios, 1930)",
+        "appears_in_chapters": "3, 4, 5 (BATIM) | Acto 1-2 (BATDR)",
+        "iconic_quote": "I am the most perfect, most beautiful angel.",
         "quote_source": "Bendy and the Ink Machine, Capítulo 3",
+        "is_alive_end": False,
+        "is_playable": False,
+        "voice_actor_batim": "Ally Murphy",
+        "voice_actor_batdr": "Ally Murphy",
+    },
+    {
+        "name": "Sammy Lawrence",
+        "alias": "The Prophet, Sammy",
+        "primary_game_key": "batim",
+        "extra_game_keys": [],
+        "role": "secondary_antagonist",
+        "character_type": "ink_monster",
+        "description": (
+            "Sammy Lawrence fue el director musical de Joey Drew Studios y uno de los primeros "
+            "en ser corrompido por la Máquina de Tinta. Convertido en una criatura de tinta, "
+            "desarrolló una devoción fanática hacia el Ink Demon Bendy, al que venera como un "
+            "dios al que pretende ofrecerle a Henry como sacrificio ritual."
+        ),
+        "appearance": (
+            "Criatura de tinta con un cuerpo humanoide envuelto en una túnica improvisada "
+            "y con una máscara de cartón con la cara de Bendy que cubre su rostro deforme."
+        ),
+        "personality": (
+            "Fanático religioso con comportamiento errático e imprevisible. Alterna entre "
+            "momentos de lucidez donde recuerda su vida pasada y accesos de fervor ritual."
+        ),
+        "background": (
+            "Compositor y director musical de talento, su alma fue una de las primeras en ser "
+            "consumidas por la Máquina de Tinta. La tinta transformó su devoción artística "
+            "en fanatismo religioso hacia el Ink Demon."
+        ),
+        "appears_in_chapters": "2, 5 (BATIM)",
+        "iconic_quote": "And now, sheep without a shepherd, I shall offer you to my lord!",
+        "quote_source": "Bendy and the Ink Machine, Capítulo 2",
+        "is_alive_end": False,
+        "is_playable": False,
+        "voice_actor_batim": "Aaron Landon",
+    },
+    # ── BATDR ─────────────────────────────────────────────────────────────────
+    {
+        "name": "Audrey",
+        "alias": "Audrey Drew",
+        "primary_game_key": "batdr",
+        "extra_game_keys": [],
+        "role": "protagonist",
+        "character_type": "human",
+        "description": (
+            "Audrey es la protagonista jugable de BATDR. Trabajadora de un estudio de animación "
+            "en los años 60, es arrastrada al Estudio Oscuro: la versión corrupta e interminable "
+            "del antiguo Joey Drew Studios. A lo largo de su aventura descubrirá que su conexión "
+            "con la tinta y con Joey Drew va mucho más allá de lo que imaginaba: es su hija, "
+            "creada a partir de la propia tinta del estudio."
+        ),
+        "appearance": (
+            "Joven mujer con cabello oscuro y vestimenta de trabajo de los años 60. "
+            "A medida que avanza el juego, gana acceso a poderes de tinta que transforman "
+            "brevemente su apariencia."
+        ),
+        "personality": (
+            "Valiente, ingeniosa y empática. Mantiene la determinación incluso ante los horrores "
+            "del Estudio Oscuro, y muestra compasión hacia los seres atrapados en él."
+        ),
+        "background": (
+            "Aparentemente una animadora ordinaria de los años 60. La verdad es que Joey Drew "
+            "la creó como su obra maestra personal — una hija de tinta con libre albedrío, "
+            "destinada a ser la heredera del estudio y su legado."
+        ),
+        "appears_in_chapters": "Todos (BATDR)",
+        "iconic_quote": "I'm not afraid of you. Not anymore.",
+        "quote_source": "Bendy and the Dark Revival",
+        "is_alive_end": True,
+        "is_playable": True,
+        "voice_actor_batdr": "Jeannie Tirado",
+    },
+    {
+        "name": "Wilson Arch",
+        "alias": "Wilson",
+        "primary_game_key": "batdr",
+        "extra_game_keys": [],
+        "role": "antagonist",
+        "character_type": "human",
+        "description": (
+            "Wilson Arch es el antagonista principal de BATDR. Se presenta inicialmente como un "
+            "aliado que quiere ayudar a Audrey a escapar del Estudio Oscuro, pero sus verdaderos "
+            "motivos son usar a Audrey — la hija de tinta de Joey Drew — para apoderarse del "
+            "control absoluto del estudio y sus poderes sobre la tinta."
+        ),
+        "appearance": (
+            "Hombre de mediana edad con traje oscuro y apariencia autoritaria. "
+            "Transmite una imagen de confianza y profesionalismo que oculta sus verdaderas intenciones."
+        ),
+        "personality": (
+            "Calculador, manipulador y ambicioso. Maestro del engaño que usa la amabilidad "
+            "como herramienta. Su obsesión por el poder lo convierte en un antagonista "
+            "más cerebral que los monstruos del estudio."
+        ),
+        "background": (
+            "Antiguo asociado de Joey Drew Studios que conoce los secretos de la Máquina de Tinta. "
+            "Lleva años planeando cómo aprovechar el poder del Estudio Oscuro para sus propios fines."
+        ),
+        "appears_in_chapters": "1, 2, 3, 4 (BATDR)",
+        "iconic_quote": "I just want to help you get home, Audrey. That's all.",
+        "quote_source": "Bendy and the Dark Revival",
+        "is_alive_end": False,
+        "is_playable": False,
+        "voice_actor_batdr": "David Scully",
+    },
+    {
+        "name": "Nathan Arch",
+        "alias": "Nathan",
+        "primary_game_key": "batdr",
+        "extra_game_keys": [],
+        "role": "secondary_antagonist",
+        "character_type": "ink_monster",
+        "description": (
+            "Nathan Arch es el hermano de Wilson, convertido en una criatura de tinta que actúa "
+            "como el músculo de su hermano dentro del Estudio Oscuro. Aunque mantiene cierta "
+            "conciencia, ha perdido gran parte de su humanidad tras su transformación."
+        ),
+        "appearance": (
+            "Gran criatura de tinta con una apariencia amenazante y distorsionada. "
+            "Conserva rasgos vagamente humanos que recuerdan a su forma original."
+        ),
+        "personality": (
+            "Leal a Wilson a pesar de su transformación. Brutal y directo en comparación "
+            "con la sutileza manipuladora de su hermano."
+        ),
+        "appears_in_chapters": "2, 3, 4 (BATDR)",
+        "iconic_quote": "",
         "is_alive_end": False,
         "is_playable": False,
     },
     {
         "name": "Allison Angel",
-        "alias": "Allison Pendle, The Good Alice",
-        "game": "batim",
+        "alias": "Allison, The Good Alice",
+        "primary_game_key": "batdr",
+        "extra_game_keys": [],
         "role": "ally",
         "character_type": "toon",
         "description": (
-            "Allison Angel es la forma bondadosa de Alice Angel, basada en el alma de Allison "
-            "Pendle, la segunda actriz de voz de Alice Angel. A diferencia de Twisted Alice, "
-            "Allison conserva su humanidad y empatía. Aparece al final del Capítulo 4 como "
-            "aliada de Henry junto a Tom. Cree que Henry es 'la esperanza' que el estudio "
-            "estaba esperando."
+            "Allison Angel es la versión alternativa de Alice Angel, creada a partir del alma de "
+            "Allison Pendle, la segunda actriz de voz de Alice Angel. A diferencia de Twisted Alice, "
+            "Allison mantiene su humanidad y actúa como guía y aliada de Audrey en el Estudio Oscuro. "
+            "En BATIM aparece brevemente en el final del Capítulo 5."
         ),
         "appearance": (
-            "Idéntica en forma a Twisted Alice pero con la cara perfectamente simétrica "
-            "y sin el aspecto de cadáver. Irradia una presencia más amable y calmada."
+            "Versión más elegante y equilibrada de Alice Angel, con el aspecto del personaje "
+            "animado original sin las deformidades de Twisted Alice."
         ),
         "personality": (
-            "Valiente, empática y leal. Actúa como líder del dúo que forma con Tom. "
-            "Confía en Henry cuando Tom desconfía de él. Puede mostrarse reacia ante "
-            "situaciones de alto riesgo pero siempre actúa cuando es necesario."
+            "Compasiva, valiente y determinada. Mantiene su humanidad intacta a pesar de su "
+            "transformación, lo que la distingue completamente de Twisted Alice."
         ),
-        "human_counterpart": "Allison Pendle (segunda actriz de voz de Alice Angel)",
-        "voice_actor_batim": "Ally Murphy",
-        "appears_in_chapters": "4 (aparición), 5 (BATIM)",
-        "iconic_quote": (
-            "You're here for a reason Henry, there's always a reason! "
-            "Even when you can't understand it. It's time, set us free!"
-        ),
-        "quote_source": "Bendy and the Ink Machine, Capítulo 5",
+        "human_counterpart": "Allison Pendle",
+        "real_world_inspiration": "Betty Boop (Fleischer Studios, 1930)",
+        "appears_in_chapters": "5 (BATIM, final) | 1, 2, 3, 4 (BATDR)",
         "is_alive_end": True,
         "is_playable": False,
+        "voice_actor_batdr": "Debi Derryberry",
     },
     {
         "name": "Tom",
-        "alias": "Tom Boris, Thomas Connor",
-        "game": "batim",
+        "alias": "Tom the Wolf, Good Boris",
+        "primary_game_key": "batdr",
+        "extra_game_keys": [],
         "role": "ally",
         "character_type": "toon",
         "description": (
-            "Tom es la contraparte alternativa de Boris el Lobo, basado en el alma de Thomas "
-            "Connor, un técnico del estudio. Aparece al final del Capítulo 4 junto a Allison. "
-            "Desconfía profundamente de Henry en el Capítulo 5, pero acaba reconociendo su valor "
-            "al ver cómo lucha. Es más agresivo y protector que Boris, y parece funcionar mejor "
-            "con extraños en BATDR que en BATIM."
+            "Tom es la versión alternativa de Boris the Wolf, creada a partir del alma de Thomas "
+            "Connor, el fontanero del estudio. Compañero de Allison Angel, actúa como guardián "
+            "silencioso y protector en el Estudio Oscuro. Aparece brevemente en el final del "
+            "Capítulo 5 de BATIM."
         ),
         "appearance": (
-            "Casi idéntico a Boris pero con cejas más inclinadas y un brazo mecánico izquierdo "
-            "que sustituye su antebrazo natural, construido con piezas de un animatrónico de Bendy. "
-            "Lleva un cinturón en el torso. Sus ojos están más juntos que los de Boris."
+            "Similar al Boris original pero con un brazo mecánico improvisado fabricado "
+            "con piezas del estudio, que usa como arma."
         ),
         "personality": (
-            "Silencioso, brusco y cauteloso. Enormemente protector con Allison. "
-            "Desconfía de los desconocidos hasta que se lo ganan con acciones, no palabras."
+            "Callado y serio, habla muy poco pero sus acciones demuestran una lealtad "
+            "inquebrantable hacia Allison y los aliados de Audrey."
         ),
-        "human_counterpart": "Thomas Connor (técnico de mantenimiento del estudio)",
-        "appears_in_chapters": "4 (aparición), 5 (BATIM)",
-        "iconic_quote": (
-            "I keep telling these people, if Mister Joey Drew keeps cutting corners like this, "
-            "someone's sure to end up falling to their death. And it sure ain't gonna be me."
-        ),
-        "quote_source": "Grabación de Thomas Connor, BATIM",
+        "human_counterpart": "Thomas Connor",
+        "appears_in_chapters": "5 (BATIM, final) | 1, 2, 3 (BATDR)",
         "is_alive_end": True,
         "is_playable": False,
-    },
-    {
-        "name": "Sammy Lawrence",
-        "alias": "Sammy, El Profeta de la Tinta",
-        "game": "batim",
-        "role": "secondary_antagonist",
-        "character_type": "ink_monster",
-        "description": (
-            "Sammy Lawrence era el director musical de Joey Drew Studios, responsable de componer "
-            "las bandas sonoras de las animaciones. Tras ser absorbido por la tinta, se convirtió "
-            "en una criatura que venera a Ink Bendy como un dios, creyendo que si le ofrece un "
-            "sacrificio, Bendy le liberará de su cuerpo de tinta. Captura a Henry en el Capítulo 2 "
-            "para ofrecerlo como sacrificio. Reaparece en el Capítulo 5 sobreviviendo al ataque "
-            "de Bendy, y muere a manos de Tom."
-        ),
-        "appearance": (
-            "Criatura humanoide cubierta de tinta negra, sin rasgos faciales definidos. "
-            "Lleva una máscara blanca con el rostro de Bendy. Viste los restos de un traje "
-            "formal de director musical."
-        ),
-        "personality": (
-            "Fanático y obsesivo en su devoción hacia Bendy. Alterna entre momentos de "
-            "lucidez (donde reconoce su situación) y episodios de fervor religioso irracional."
-        ),
-        "human_counterpart": "Sammy Lawrence (director musical)",
-        "appears_in_chapters": "2 (antagonista principal), 5 (reaparición, BATIM)",
-        "iconic_quote": "Sheep, sheep, sheep. It's time for sleep. Rest your head. Now count those sheep.",
-        "quote_source": "Bendy and the Ink Machine, Capítulo 2",
-        "is_alive_end": False,
-        "is_playable": False,
-    },
-    {
-        "name": "The Butcher Gang",
-        "alias": "Charley, Barley, Edgar",
-        "game": "batim",
-        "role": "antagonist",
-        "character_type": "ink_monster",
-        "description": (
-            "The Butcher Gang es un trío de personajes animados secundarios que aparecen como "
-            "enemigos recurrentes en los Capítulos 3 y 4. Son versiones corrompidas de los "
-            "personajes de los cortos animados: Charley (el líder avaro), Barley (el pirata "
-            "malhumorado) y Edgar (el pequeño infantil con un pato de juguete). Sus formas de "
-            "tinta son deformes y agresivas."
-        ),
-        "appearance": (
-            "Charley: figura esquelética con sombrero de copa deformado. "
-            "Barley: pirata robusto con parche en el ojo. "
-            "Edgar: pequeña criatura con patas de araña y cuerpo redondo."
-        ),
-        "personality": (
-            "En los cortos originales: Charley es avaro y sin paciencia, Barley es serio y "
-            "fuma en pipa, Edgar es adorable pero torpe. En sus formas de tinta actúan "
-            "exclusivamente por agresión."
-        ),
-        "appears_in_chapters": "3, 4 (BATIM)",
-        "iconic_quote": (
-            "The disgusting wretches have wandered my halls, have gone unchecked! "
-            "They're trying to drag me back to the darkness! Don't let them take your angel"
-        ),
-        "quote_source": "Twisted Alice refiriéndose a The Butcher Gang, BATIM Cap. 3",
-        "is_alive_end": False,
-        "is_playable": False,
-    },
-    {
-        "name": "The Projectionist",
-        "alias": "Norman Polk, El Proyeccionista",
-        "game": "batim",
-        "role": "antagonist",
-        "character_type": "ink_monster",
-        "description": (
-            "El Proyeccionista es la versión corrompida de Norman Polk, el proyeccionista del "
-            "estudio, absorbido por la tinta con un proyector de película fusionado en su cabeza. "
-            "Patrulla las áreas oscuras del estudio proyectando luz, lo que lo convierte en un "
-            "peligro único: su cono de luz detecta a Henry. Es asesinado por Ink Bendy en el "
-            "Capítulo 4 en una de las escenas más impactantes del juego."
-        ),
-        "appearance": (
-            "Criatura humanoide alta cubierta completamente de tinta negra con un proyector de "
-            "película como cabeza. Largos cables negros cuelgan de su espalda. Viste restos de "
-            "ropa de trabajo con mangas enrolladas y botas grandes. Tiene un altavoz en el pecho."
-        ),
-        "personality": (
-            "No muestra personalidad propia en su forma monstruosa, actuando por instinto "
-            "de patrulla. Las grabaciones de Norman Polk muestran que era un trabajador "
-            "práctico y directo que advertía de los peligros del estudio."
-        ),
-        "human_counterpart": "Norman Polk (proyeccionista del estudio)",
-        "appears_in_chapters": "3 (primero mencionado), 4 (antagonista, BATIM)",
-        "iconic_quote": "It's just the nature of us projectionists to seek out the dark places.",
-        "quote_source": "Grabación de Norman Polk, BATIM",
-        "is_alive_end": False,
-        "is_playable": False,
-    },
-
-    # ── PERSONAJES DE BATDR ────────────────────────────────────────────────────
-    {
-        "name": "Audrey",
-        "alias": "Audrey Drew",
-        "game": "batdr",
-        "role": "protagonist",
-        "character_type": "human",
-        "description": (
-            "Audrey es la protagonista jugable de Bendy and the Dark Revival. Empleada de "
-            "Joey Drew Studios en su nueva encarnación corporativa, Audrey es arrastrada "
-            "al Estudio Oscuro (Dark Studio) y debe escapar. A lo largo del juego descubre "
-            "una conexión personal profunda con Joey Drew y con los orígenes de la Máquina "
-            "de Tinta. Es hija biológica de Joey Drew, creada a partir de tinta."
-        ),
-        "appearance": (
-            "Mujer joven con cabello oscuro corto y ropa de trabajo de los años 60. "
-            "A medida que avanza la historia, su apariencia muestra señales de su "
-            "verdadera naturaleza como criatura de tinta."
-        ),
-        "personality": (
-            "Decidida, sarcástica y resiliente. Más activa y combativa que Henry, "
-            "ya que puede atacar directamente a los enemigos. Mantiene su sentido del "
-            "humor incluso en situaciones desesperadas."
-        ),
-        "appears_in_chapters": "Todos (BATDR)",
-        "iconic_quote": "I'm done being someone's puppet.",
-        "quote_source": "Bendy and the Dark Revival",
-        "is_alive_end": True,
-        "is_playable": True,
-        "voice_actor_batdr": "Ally Murphy",
-    },
-    {
-        "name": "Wilson Arch",
-        "alias": "Wilson, El Profeta",
-        "game": "batdr",
-        "role": "antagonist",
-        "character_type": "human",
-        "description": (
-            "Wilson Arch es el antagonista principal de Bendy and the Dark Revival. "
-            "Antiguo empleado del estudio con poderes sobre la tinta, Wilson ha desarrollado "
-            "una filosofía de control absoluto sobre el Estudio Oscuro. Cree que puede "
-            "dominar el caos de la tinta y convertirse en su amo. Su relación con Audrey "
-            "es compleja: la guía, la manipula y finalmente se convierte en su mayor amenaza."
-        ),
-        "appearance": (
-            "Hombre de mediana edad con traje formal y una varita de madera que usa "
-            "para canalizar sus poderes sobre la tinta. Su apariencia es la de un "
-            "ejecutivo elegante que oculta algo siniestro."
-        ),
-        "personality": (
-            "Carismático y autoritario. Habla con la seguridad de alguien que cree "
-            "tener todas las respuestas. Su obsesión con el control lo corrompe "
-            "progresivamente a lo largo del juego."
-        ),
-        "appears_in_chapters": "Todos (BATDR, como figura de fondo y antagonista final)",
-        "iconic_quote": "Ink doesn't lie. Ink reveals what you truly are.",
-        "quote_source": "Bendy and the Dark Revival",
-        "is_alive_end": False,
-        "is_playable": False,
-        "voice_actor_batdr": "Todd Haberkorn",
-    },
-    {
-        "name": "Gent Porter",
-        "alias": "Porter",
-        "game": "batdr",
-        "role": "neutral",
-        "character_type": "toon",
-        "description": (
-            "Los Gent Porters son robots de servicio con cabeza de Bendy que pueblan el "
-            "Estudio Oscuro. Actúan como empleados corporativos de la nueva Gent Corporation, "
-            "realizando tareas de transporte y servicio. Algunos son hostiles, otros pueden "
-            "ser ignorados. Representan la corporatización del legado de Joey Drew."
-        ),
-        "appearance": (
-            "Robots con cuerpo mecánico y una cabeza que imita la del personaje Bendy. "
-            "Visten uniformes de empleado de la corporación Gent."
-        ),
-        "personality": (
-            "Autómatas programados, sin personalidad propia. Los hostiles atacan "
-            "a cualquier intruso. Los de servicio continúan sus rutinas independientemente "
-            "de lo que ocurra a su alrededor."
-        ),
-        "appears_in_chapters": "Todos (BATDR)",
-        "is_alive_end": None,
-        "is_playable": False,
-    },
-    {
-        "name": "Charley (BATDR)",
-        "alias": "Charley, Ink Charley",
-        "game": "batdr",
-        "role": "antagonist",
-        "character_type": "ink_monster",
-        "description": (
-            "Versión remasterizada de Charley de The Butcher Gang, ahora con un rol más "
-            "prominente en BATDR. Actúa como mini-jefe y enemigo recurrente, con una "
-            "inteligencia mayor que su versión de BATIM. Su diseño ha sido actualizado "
-            "para resultar más amenazante."
-        ),
-        "appears_in_chapters": "Varios (BATDR)",
-        "is_alive_end": False,
-        "is_playable": False,
-    },
-    {
-        "name": "Ink Bendy (BATDR)",
-        "alias": "Buddy Bendy, Buddy",
-        "game": "batdr",
-        "role": "ally",
-        "character_type": "hybrid",
-        "description": (
-            "En BATDR, el Ink Demon ha evolucionado hacia una entidad más consciente llamada "
-            "'Buddy Bendy' o simplemente 'Buddy'. Actúa como guía ambiguo de Audrey, "
-            "apareciendo en momentos clave para ayudarla o advertirla. Su relación con Audrey "
-            "es central para la narrativa: parecen compartir un vínculo especial relacionado "
-            "con la tinta y con el legado de Joey Drew."
-        ),
-        "appears_in_chapters": "Varios (BATDR, guía)",
-        "iconic_quote": "My ink swells and boils. It consumes. I... am the Ink Demon.",
-        "quote_source": "Bendy and the Dark Revival",
-        "is_alive_end": True,
-        "is_playable": False,
-        "voice_actor_batdr": "Tyler Bunch",
     },
 ]
 
+
+# ── Datos de los capítulos ────────────────────────────────────────────────────
+# El campo `game` ahora es la clave del modelo Game (str: "batim" | "batdr")
+
 CHAPTERS_DATA: list[dict] = [
-    # ── CAPÍTULOS DE BATIM ─────────────────────────────────────────────────────
+    # ── BATIM ─────────────────────────────────────────────────────────────────
     {
-        "game": "batim",
+        "game_key": "batim",
         "number": 1,
         "title": "Moving Pictures",
         "art_theme": "animation",
         "art_theme_explanation": (
-            "El primer capítulo hace referencia al arte de la animación y el dibujo, "
-            "que es la base del estudio. Todo el entorno está diseñado como un taller de "
-            "animación de los años 30, con mesas de dibujo, carteles y la icónica Máquina "
-            "de Tinta como elemento central."
+            "El primer capítulo homenajea la animación clásica y el proceso de creación de "
+            "dibujos animados de los años 30. Las máquinas de proyección, los bocetos en las "
+            "paredes y los pupitres de animadores recrean el ambiente de un estudio de la era "
+            "dorada de la animación americana."
         ),
         "release_date": "2017-02-10",
+        "last_update_date": "2018-11-13",
         "synopsis": (
-            "Henry regresa al estudio de animación de su viejo amigo Joey Drew tras recibir "
-            "una carta misteriosa. Al llegar, encuentra el lugar abandonado e infestado de "
-            "criaturas de tinta. Descubre la Máquina de Tinta y, al intentar activarla, "
-            "desencadena la aparición del Ink Bendy. El suelo cede bajo sus pies y Henry "
-            "cae inconsciente tras sufrir tres alucinaciones inquietantes."
+            "Henry Stein recibe una carta de su antiguo socio Joey Drew y regresa al estudio "
+            "que ambos fundaron hace 30 años. El estudio está abandonado y misteriosamente "
+            "infestado de tinta y criaturas. Henry activa una antigua Máquina de Tinta y "
+            "descubre los horrores que se ocultan en el lugar donde trabajó durante décadas."
         ),
         "aesthetics": (
-            "Ambiente lúgubre y abandonado con iluminación tenue y amarillenta. El juego "
-            "comenzó con paleta blanco y negro, pero en la actualización del Capítulo 4 "
-            "el blanco fue reemplazado por tonos amarillos cálidos para evocar el cine "
-            "antiguo. Los jumpscares con recortes de cartón de Bendy y la escena con "
-            "el cuerpo de Boris establecen el tono de horror corporal del juego."
+            "Estética sepia y amarillenta que evoca el papel envejecido y la tinta seca. "
+            "Los pasillos estrechos y la iluminación tenue crean una atmósfera de claustrofobia "
+            "y decrepitud industrial mezclada con el encanto nostálgico de los cartoons clásicos."
         ),
         "setting_description": (
-            "Las plantas superiores de Joey Drew Studios: pasillos de madera, oficinas "
-            "con mesas de animación, la sala de la Máquina de Tinta y los almacenes "
-            "superiores del edificio."
+            "Las plantas superiores del Joey Drew Studios: salas de animación, despachos "
+            "y la sala de la Máquina de Tinta. Techos bajos, madera oscura y tinta por todas partes."
         ),
         "difficulty": "introductory",
         "has_boss_fight": False,
         "has_stealth_sections": False,
         "has_puzzle_sections": True,
-        "approximate_duration_minutes": 45,
+        "approximate_duration_minutes": 30,
         "protagonist": "Henry Stein",
-        "main_villain": "Ink Bendy (primera aparición)",
-        "new_characters_introduced": "Henry Stein, Joey Drew (carta), Boris (muerto), Ink Bendy",
+        "main_villain": "Ink Bendy (persecución)",
+        "new_characters_introduced": "Henry Stein, Ink Bendy, Sammy Lawrence (audio)",
         "key_events": (
-            "— Llegada de Henry al estudio abandonado.\n"
-            "— Descubrimiento y activación de la Máquina de Tinta.\n"
-            "— Primera aparición del Ink Bendy.\n"
-            "— Caída de Henry al nivel inferior."
+            "— Henry llega al estudio y activa la Máquina de Tinta.\n"
+            "— Descubre las ofrendas de los empleados alrededor de la máquina.\n"
+            "— Primera aparición del Ink Demon.\n"
+            "— Henry cae a un nivel inferior del estudio."
         ),
         "lore_revelations": (
-            "— El estudio de animación está infestado de tinta viva.\n"
-            "— Existe un ritual con velas y figuras de Bendy.\n"
-            "— El cuerpo de Boris en la sala de disección sugiere experimentos horribles.\n"
-            "— La Máquina de Tinta requiere 'sacrificios' para funcionar."
+            "— Joey Drew envió cartas a todos los exempleados para que volvieran al estudio.\n"
+            "— Los empleados realizaban rituales alrededor de la Máquina de Tinta.\n"
+            "— Algo salió terriblemente mal con los experimentos del estudio."
         ),
-        "soundtrack_notes": (
-            "Melodía minimalista de cuatro notas que se repite, creando tensión sin resolución. "
-            "El tema principal establece el leitmotiv del juego completo."
-        ),
+        "composer": "theMeatly",
         "trivia": (
-            "— Este fue el capítulo lanzado originalmente como demo en febrero de 2017, "
-            "generando una enorme expectación viral.\n"
-            "— El juego fue creado inicialmente por theMeatly solo, sin equipo.\n"
-            "— El diseño está inspirado en Fleischer Studios, rival de Disney en los años 30.\n"
-            "— Bendy está basado en Bimbo de Fleischer; Boris en Koko the Clown; Alice en Betty Boop."
+            "— Es el capítulo más corto del juego, diseñado como tutorial.\n"
+            "— El primer capítulo fue lanzado de forma independiente y gratuita en 2017, "
+            "antes del lanzamiento completo del juego.\n"
+            "— La canción 'Build Our Machine' se convirtió en un himno de la comunidad fandom."
         ),
         "reception_notes": (
-            "El capítulo se volvió viral en YouTube gracias a creadores de contenido como Markiplier "
-            "y Jacksepticeye. Su estética única y su atmósfera de horror retro lo convirtieron "
-            "en un fenómeno de internet casi inmediatamente después de su lanzamiento."
+            "Recibido con entusiasmo masivo por la comunidad de YouTube y Twitch. "
+            "Su estética única y el misterio de su narrativa lo convirtieron en viral "
+            "prácticamente de inmediato."
         ),
     },
     {
-        "game": "batim",
+        "game_key": "batim",
         "number": 2,
         "title": "The Old Song",
         "art_theme": "music",
         "art_theme_explanation": (
-            "El segundo capítulo está dedicado a la música como forma de arte. "
-            "El departamento de grabación musical del estudio es el escenario principal, "
-            "y las grabaciones de audio de Sammy Lawrence articulan tanto la narrativa "
-            "como el papel de la música en la cultura del estudio."
+            "El segundo capítulo está dedicado a la música y al departamento musical del estudio. "
+            "El protagonismo de Sammy Lawrence como director musical, los instrumentos desperdigados "
+            "por las salas y las grabaciones de audio que cuentan la historia reflejan la importancia "
+            "de la música en la cultura de Joey Drew Studios."
         ),
         "release_date": "2017-04-18",
+        "last_update_date": "2018-11-13",
         "synopsis": (
-            "Henry despierta en el nivel inferior del estudio y busca una salida a través "
-            "del departamento de música. Encuentra grabaciones de Sammy Lawrence que revelan "
-            "su devoción enfermiza por Bendy. Sammy captura a Henry para ofrecerlo como "
-            "sacrificio a Bendy, creyendo que así será liberado de su cuerpo de tinta. "
-            "Bendy aparece pero mata a Sammy en lugar de liberarlo. Henry escapa y encuentra "
-            "a un Boris vivo al final del capítulo."
-        ),
-        "aesthetics": (
-            "La música es protagonista tanto diegética como extradiegéticamente. "
-            "La melodía minimalista del juego alcanza su máxima expresión en este capítulo. "
-            "El departamento musical tiene un ambiente de iglesia corrompida gracias a "
-            "las decoraciones de Sammy, que ha convertido el lugar en un templo a Bendy."
-        ),
-        "setting_description": (
-            "Departamento de música del estudio: salas de grabación, cabinas de control, "
-            "almacenes de instrumentos y el santuario personal de Sammy Lawrence."
+            "Henry explora el departamento de música del estudio y se encuentra con Sammy Lawrence, "
+            "el antiguo director musical convertido en una criatura de tinta fanática. Sammy intenta "
+            "sacrificar a Henry al Ink Demon Bendy como ofrenda ritual. Henry logra escapar y "
+            "desciende aún más profundo en el estudio."
         ),
         "difficulty": "easy",
-        "has_boss_fight": False,
+        "has_boss_fight": True,
+        "boss_name": "Sammy Lawrence",
         "has_stealth_sections": True,
         "has_puzzle_sections": True,
-        "approximate_duration_minutes": 60,
+        "approximate_duration_minutes": 45,
         "protagonist": "Henry Stein",
         "main_villain": "Sammy Lawrence",
-        "new_characters_introduced": "Sammy Lawrence (antagonista), Boris (vivo, final)",
+        "new_characters_introduced": "Sammy Lawrence (físico), Boris (muerto), Inky the Searchers",
         "key_events": (
-            "— Exploración del departamento de música.\n"
-            "— Captura de Henry por Sammy Lawrence.\n"
-            "— Ritual de sacrificio interrumpido por el propio Bendy.\n"
-            "— Bendy mata a Sammy (aparentemente).\n"
-            "— Henry encuentra a Boris vivo al final."
+            "— Henry descubre el santuario de Sammy Lawrence al Ink Demon.\n"
+            "— Sammy captura a Henry para sacrificarlo.\n"
+            "— El Ink Demon interrumpe el ritual y destruye a Sammy.\n"
+            "— Henry descubre el cadáver de Boris the Wolf y decide buscar a más supervivientes."
         ),
         "lore_revelations": (
-            "— Sammy Lawrence y otros empleados fueron absorbidos por la tinta.\n"
-            "— Sammy venera a Bendy como una deidad.\n"
-            "— La tinta puede 'poseer' a las personas y alterar su psique.\n"
-            "— Existen supervivientes humanos en el estudio."
+            "— Sammy Lawrence fue convertido en tinta por la Máquina de Tinta.\n"
+            "— Hay una religión formada alrededor del Ink Demon dentro del estudio.\n"
+            "— La Máquina de Tinta transforma a las personas en criaturas."
         ),
-        "soundtrack_notes": (
-            "El capítulo explora con más profundidad la banda sonora. Las grabaciones de "
-            "Sammy incluyen fragmentos de las melodías originales del estudio, dando contexto "
-            "a la cultura musical que existía antes del desastre."
-        ),
+        "composer": "theMeatly",
         "trivia": (
-            "— Sammy se convirtió rápidamente en el personaje favorito del fandom por su "
-            "fanatismo exagerado hacia Bendy ('SHEEP SHEEP SHEEP').\n"
-            "— El capítulo introdujo las secciones de sigilo, una novedad mecánica para el juego.\n"
-            "— Boris sobreviviente fue la mayor sorpresa del capítulo."
-        ),
-        "reception_notes": (
-            "Muy bien recibido por la comunidad. La escena del ritual de Sammy se convirtió "
-            "en un meme popular. El personaje de Sammy generó una cantidad enorme de fan art."
+            "— La mecánica de sigilo introducida en este capítulo se convirtió en una "
+            "de las más comentadas de la comunidad.\n"
+            "— La sala del órgano de Sammy es uno de los escenarios más icónicos de la franquicia."
         ),
     },
     {
-        "game": "batim",
+        "game_key": "batim",
         "number": 3,
         "title": "Rise and Fall",
         "art_theme": "literature",
         "art_theme_explanation": (
-            "El tercer capítulo está dedicado a la literatura y al arte de la voz y los "
-            "diálogos. El departamento de grabación de voz es el escenario, y la narrativa "
-            "se articula principalmente a través de diálogos con Twisted Alice y grabaciones "
-            "que cuentan historias en primera persona."
+            "El tercer capítulo se ambienta en el departamento de guiones y diálogos, "
+            "explorando el papel de la escritura y las voces en la creación animada. "
+            "Las grabaciones de las actrices de voz, los guiones y las salas de grabación "
+            "son el escenario de los horrores de este capítulo."
         ),
-        "release_date": "2017-09-14",
+        "release_date": "2017-09-28",
+        "last_update_date": "2018-11-13",
         "synopsis": (
-            "Henry despierta en la 'Casa Segura', donde Boris lo llevó tras los eventos del "
-            "capítulo anterior. Ambos exploran el estudio buscando una salida. Conocen a "
-            "Twisted Alice, que se presenta como aliada a cambio de ayuda con varios recados. "
-            "Tras completarlos, Alice traiciona a Henry y manipula el ascensor para matarlo "
-            "mientras rapta a Boris para modificarlo en su búsqueda de 'perfección'."
-        ),
-        "aesthetics": (
-            "Los diálogos de Alice dominan el capítulo, con una narración que alterna entre "
-            "amenaza y manipulación. Las grabaciones de Susie Campbell revelan su historia "
-            "de una manera desgarradora. El entorno de producción de voz tiene una estética "
-            "de teatro abandonado."
-        ),
-        "setting_description": (
-            "La Casa Segura de Boris, los pasillos del departamento de producción de voz, "
-            "salas de grabación y el sistema de ascensores del edificio."
+            "Henry encuentra a Boris the Wolf vivo y juntos exploran el departamento de "
+            "literatura y voces del estudio. Allí encuentran a Twisted Alice, una criatura "
+            "que mezcla la apariencia de Alice Angel con una masa deforme de tinta. Alice "
+            "actúa como aliada al principio, pero pronto revela sus verdaderas intenciones."
         ),
         "difficulty": "medium",
         "has_boss_fight": False,
         "has_stealth_sections": True,
         "has_puzzle_sections": True,
-        "approximate_duration_minutes": 90,
+        "approximate_duration_minutes": 60,
         "protagonist": "Henry Stein",
         "main_villain": "Twisted Alice",
-        "new_characters_introduced": (
-            "Twisted Alice, The Butcher Gang (Charley, Barley, Edgar), The Projectionist (mencionado)"
-        ),
+        "new_characters_introduced": "Twisted Alice, Boris (vivo), The Butcher Gang",
         "key_events": (
-            "— Henry y Boris exploran juntos el estudio.\n"
-            "— Primera aparición y presentación de Twisted Alice.\n"
-            "— Recados para Alice: búsqueda de partes y componentes.\n"
-            "— Traición de Alice: ascensor saboteado.\n"
-            "— Rapto de Boris por parte de Alice."
+            "— Henry encuentra a Boris the Wolf vivo en una habitación segura.\n"
+            "— Twisted Alice contacta con Henry y lo usa para recolectar almas.\n"
+            "— Alice revela que quiere las partes de Boris para 'perfeccionarse'.\n"
+            "— Henry y Boris escapan temporalmente de Alice."
         ),
         "lore_revelations": (
             "— Twisted Alice es Susie Campbell, la primera actriz de voz de Alice Angel.\n"
-            "— Joey Drew mató a Susie para usar su alma en la Máquina de Tinta.\n"
-            "— Hay una sala secreta con una grabación del propio Henry.\n"
-            "— La Máquina de Tinta puede usar almas para crear criaturas específicas."
+            "— La Máquina de Tinta intentó crear versiones animadas de personas reales.\n"
+            "— El proceso de creación de criaturas fue el origen de los monstruos del estudio."
         ),
-        "soundtrack_notes": (
-            "La voz de Twisted Alice actúa como instrumento musical en sí misma, "
-            "con un timbre que oscila entre lo angelical y lo amenazante."
-        ),
-        "trivia": (
-            "— Este capítulo es el más largo de BATIM hasta BATDR.\n"
-            "— La relación Henry-Boris fue muy celebrada por el fandom.\n"
-            "— The Butcher Gang aparece aquí por primera vez como enemigos activos."
-        ),
-        "reception_notes": (
-            "Considerado por muchos fans como el mejor capítulo de BATIM por su equilibrio "
-            "entre narrativa, exploración y mecánicas de juego."
-        ),
+        "composer": "theMeatly",
     },
     {
-        "game": "batim",
+        "game_key": "batim",
         "number": 4,
         "title": "Colossal Wonders",
         "art_theme": "scenography",
         "art_theme_explanation": (
-            "El cuarto capítulo está dedicado a la escenografía y el diseño de producción, "
-            "escenificado en el parque temático abandonado dentro del estudio, que representa "
-            "el esfuerzo máximo de diseño de escenarios de Joey Drew Studios."
+            "El cuarto capítulo celebra la escenografía y el diseño de producción, "
+            "con enormes sets de filmación, atrezzo teatral y los bastidores de un estudio "
+            "de producción cinematográfica de los años 40. Los enormes espacios contrastan "
+            "con la claustrofobia de los capítulos anteriores."
         ),
         "release_date": "2018-04-30",
-        "last_update_date": "2018-04-30",
+        "last_update_date": "2018-11-13",
         "synopsis": (
-            "Henry sobrevive al accidente del ascensor y llega a un parque de atracciones "
-            "abandonado dentro del estudio. Allí se enfrenta al jefe del parque (una cabeza "
-            "gigante en un tiovivo), evita a The Butcher Gang y escapa del Proyeccionista, "
-            "que es asesinado por Bendy en un impactante momento. Al llegar al laboratorio "
-            "de Alice, descubre que Boris ha sido convertido en una abominación (Brute Boris). "
-            "Tras derrotarlo, Alice enfurecida ataca a Henry, pero es asesinada por Allison "
-            "Angel y Tom."
-        ),
-        "aesthetics": (
-            "Este capítulo fue el que introdujo la remasterización visual del juego: la "
-            "paleta cambió de blanco y negro/amarillo claro a los tonos amarillos cálidos "
-            "más pronunciados que se convirtieron en el estilo definitivo. El parque de "
-            "atracciones añade una capa de ironía oscura al horror."
-        ),
-        "setting_description": (
-            "Parque de atracciones abandonado dentro del estudio, laboratorios subterráneos "
-            "de Twisted Alice y los pasillos que los conectan."
+            "Henry queda atrapado en las plantas inferiores del estudio mientras Twisted Alice "
+            "captura a Boris. Henry debe abrirse paso por los enormes almacenes y sets de "
+            "producción del estudio para rescatarlo, pero al encontrar a Boris descubre que "
+            "ha sido transformado en 'Brute Boris' por Twisted Alice, que lo usa como jefe final."
         ),
         "difficulty": "hard",
         "has_boss_fight": True,
-        "boss_name": "Brute Boris (Boris corrompido por Twisted Alice)",
-        "has_stealth_sections": True,
+        "boss_name": "Brute Boris",
+        "has_stealth_sections": False,
         "has_puzzle_sections": True,
         "approximate_duration_minutes": 75,
         "protagonist": "Henry Stein",
-        "main_villain": "Twisted Alice",
-        "new_characters_introduced": "Allison Angel, Tom, Brute Boris (jefe)",
+        "main_villain": "Twisted Alice / Brute Boris",
+        "new_characters_introduced": "Brute Boris, Bertrum Piedmont",
         "key_events": (
-            "— Exploración del parque de atracciones.\n"
-            "— El Proyeccionista es asesinado por Ink Bendy.\n"
-            "— Boss fight contra Brute Boris.\n"
-            "— Muerte de Twisted Alice a manos de Allison y Tom.\n"
-            "— Primera aparición de Allison Angel y Tom."
+            "— Henry es capturado y despierta en las plantas inferiores del estudio.\n"
+            "— Descubre el parque de atracciones fallido de Bertrum Piedmont.\n"
+            "— Derrota al jefe Bertrum Piedmont.\n"
+            "— Encuentra a Boris convertido en Brute Boris y se ve obligado a derrotarlo."
         ),
         "lore_revelations": (
-            "— Alice puede modificar criaturas de tinta para crear monstruos más poderosos.\n"
-            "— Existen otras versiones de los personajes animados (Allison vs. Alice).\n"
-            "— Ink Bendy tiene control territorial sobre el estudio y ataca incluso a otras criaturas.\n"
-            "— El parque temático revela el alcance de los sueños de Joey Drew."
+            "— Joey Drew encargó un parque de atracciones de Bendy que nunca llegó a abrirse.\n"
+            "— Twisted Alice puede transformar y modificar a otras criaturas de tinta.\n"
+            "— El estudio tiene niveles subterráneos de gran tamaño."
         ),
+        "composer": "theMeatly",
         "trivia": (
-            "— La muerte del Proyeccionista a manos de Bendy es considerada uno de los "
-            "momentos más espectaculares del juego.\n"
-            "— La remasterización visual de este capítulo fue retroactivamente aplicada "
-            "a los capítulos anteriores.\n"
-            "— Brute Boris generó mucha controversia por lo que le ocurrió al querido Boris."
+            "— La batalla contra Bertrum Piedmont es una de las más elaboradas del juego.\n"
+            "— La transformación de Boris en Brute Boris fue uno de los momentos más impactantes "
+            "de la saga para la comunidad fandom."
         ),
         "reception_notes": (
-            "Recibido con entusiasmo por la espectacularidad de sus momentos, aunque algunos "
-            "fans lamentaron el destino de Boris. La introducción de Allison y Tom fue "
-            "muy bien recibida."
+            "El capítulo fue elogiado por expandir el lore y la escala del mundo, "
+            "aunque la muerte de Boris generó división entre los fans."
         ),
     },
     {
-        "game": "batim",
+        "game_key": "batim",
         "number": 5,
         "title": "The Last Reel",
         "art_theme": "film",
         "art_theme_explanation": (
-            "El capítulo final está dedicado al séptimo arte: el cine y la proyección "
-            "cinematográfica. El rollo de película 'THE END' es el MacGuffin del capítulo, "
-            "y la resolución del juego es literalmente proyectar una película para acabar "
-            "con Bendy. El ciclo narrativo del juego es también una referencia a los bucles "
-            "de bobina del cine primitivo."
+            "El capítulo final rinde homenaje al séptimo arte y al cine. "
+            "La sala de proyección, los rollos de película, los pasillos estilo teatro y "
+            "la confrontación final con Joey Drew tienen la estructura dramática de un "
+            "clímax cinematográfico clásico."
         ),
-        "release_date": "2018-11-07",
+        "release_date": "2018-10-26",
         "synopsis": (
-            "Henry está encarcelado en la casa de Allison y Tom. Escapan cuando Bendy ataca. "
-            "Henry se reencuentra brevemente con Sammy (que sobrevivió), quien es asesinado "
-            "por Tom. El grupo llega a la Ciudad de Tinta. Henry cae al despacho de Joey y "
-            "descubre el rollo 'THE END'. Finalmente llegan a la Máquina de Tinta convertida "
-            "en palacio. Henry proyecta el rollo, Bendy se transforma en una bestia, es "
-            "derrotado y la historia se revela como un bucle eterno. Joey explica todo en "
-            "una escena final con Henry, y el juego reinicia."
-        ),
-        "aesthetics": (
-            "El capítulo final integra los cuatro temas artísticos anteriores. Las animaciones "
-            "transitan entre lo terrorífico (transformación de Bendy en bestia) y lo íntimo "
-            "(conversación final con Joey). El bucle temporal recuerda al mito de Sísifo: "
-            "Henry empuja su piedra eternamente."
-        ),
-        "setting_description": (
-            "La casa de Allison y Tom, la Ciudad de Tinta, el despacho de Joey Drew, "
-            "el palacio de la Máquina de Tinta y, finalmente, la casa de Joey en el mundo real."
+            "Henry llega a las profundidades finales del estudio y se enfrenta al origen "
+            "de todo: Joey Drew en persona, un anciano que parece arrepentido de sus actos. "
+            "Henry descubre la verdad sobre el Ciclo, sobre su propia naturaleza como réplica "
+            "de tinta, y tiene la oportunidad de romper el ciclo o perpetuarlo. La decisión "
+            "final determina el destino de Henry y todos los atrapados en el estudio."
         ),
         "difficulty": "boss_heavy",
         "has_boss_fight": True,
         "boss_name": "Beast Bendy (forma final del Ink Demon)",
         "has_stealth_sections": True,
         "has_puzzle_sections": True,
-        "approximate_duration_minutes": 120,
+        "approximate_duration_minutes": 90,
         "protagonist": "Henry Stein",
-        "main_villain": "Ink Bendy / Beast Bendy",
-        "new_characters_introduced": "Beast Bendy (forma final)",
+        "main_villain": "Joey Drew / Beast Bendy",
+        "new_characters_introduced": "Joey Drew (físico), Allison Angel, Tom",
         "key_events": (
-            "— Fuga de la casa de Allison y Tom.\n"
-            "— Reencuentro y muerte de Sammy Lawrence.\n"
-            "— Descubrimiento del rollo 'THE END' en el despacho de Joey.\n"
-            "— Boss fight contra Beast Bendy.\n"
-            "— Proyección del rollo y derrota de Bendy.\n"
-            "— Conversación final con Joey Drew.\n"
-            "— Reinicio del ciclo: Henry vuelve al inicio del juego."
+            "— Henry descubre la sala de proyección final de Joey Drew.\n"
+            "— Joey Drew revela la verdad sobre el Ciclo y la naturaleza de Henry.\n"
+            "— Batalla final contra Beast Bendy.\n"
+            "— Henry rompe el Ciclo y regresa a su casa con Linda."
         ),
         "lore_revelations": (
-            "— La historia entera es un bucle temporal que se repite indefinidamente.\n"
-            "— Los mensajes ocultos que solo se ven con el espejo son escritos por Henry.\n"
-            "— Joey Drew sabe lo que ha hecho y muestra arrepentimiento.\n"
-            "— La escena postcréditos sugiere que todo puede haber sido una historia que Joey "
-            "le cuenta a su sobrina, o un final feliz alternativo.\n"
-            "— El rollo 'THE END' es el único objeto capaz de destruir a Bendy definitivamente."
+            "— Henry es una réplica de tinta del Henry real, atrapada en el Ciclo.\n"
+            "— Joey Drew creó el Ciclo para revivir sus memorias y arrepentimientos eternamente.\n"
+            "— Allison y Tom son versiones alternativas de Alice Angel y Boris con almas reales.\n"
+            "— El Henry real nunca entró al estudio; fue la réplica quien vivió toda la aventura."
         ),
-        "soundtrack_notes": (
-            "La banda sonora alcanza su climax con el enfrentamiento contra Beast Bendy, "
-            "usando temas de capítulos anteriores en versiones más intensas. "
-            "La escena final con Joey usa una melodía más suave y melancólica."
-        ),
+        "composer": "theMeatly",
         "trivia": (
-            "— El final en bucle generó enorme debate en la comunidad sobre su significado.\n"
-            "— La escena postcréditos tiene dos interpretaciones completamente válidas.\n"
-            "— Beast Bendy es significativamente más grande e intimidante que el Ink Demon estándar.\n"
-            "— El despacho de Joey es una de las salas más ricamente decoradas del juego."
+            "— El final del juego fue interpretado de múltiples formas por la comunidad, "
+            "generando debates sobre su significado durante años.\n"
+            "— La inclusión de Allison y Tom en el final preparó el terreno para BATDR."
         ),
         "reception_notes": (
-            "El final fue polémico: muchos fans esperaban una resolución más definitiva. "
-            "Sin embargo, la comunidad acabó apreciando la profundidad filosófica del bucle "
-            "y sus paralelismos con el mito de Sísifo y la alienación laboral marxista."
+            "El capítulo final recibió críticas mixtas: elogios por la escala y las revelaciones "
+            "del lore, pero algunas críticas por la complejidad de la narrativa y la ambigüedad "
+            "del final."
         ),
     },
-
-    # ── CAPÍTULOS DE BATDR ─────────────────────────────────────────────────────
+    # ── BATDR ─────────────────────────────────────────────────────────────────
     {
-        "game": "batdr",
+        "game_key": "batdr",
         "number": 1,
-        "title": "Into the Ink",
+        "title": "Into the Dark",
         "art_theme": "none",
         "release_date": "2022-10-21",
         "synopsis": (
-            "Audrey, empleada de la nueva Joey Drew Studios (ahora una corporación llamada "
-            "Gent), es arrastrada al Estudio Oscuro a través de un misterioso portal de tinta. "
-            "Despierta en una versión distorsionada y más vasta del estudio original y debe "
-            "orientarse en este nuevo mundo, encontrando los primeros Gent Porters y "
-            "descubriendo las reglas de este nuevo entorno."
-        ),
-        "aesthetics": (
-            "BATDR actualiza la estética a un motor más moderno manteniendo la paleta amarilla "
-            "y negra. El Estudio Oscuro es más grande, más laberíntico y más opresivo que el "
-            "estudio original de BATIM. La iluminación volumétrica y los efectos de tinta "
-            "son significativamente más elaborados."
+            "Audrey, animadora de un estudio de los años 60, es arrastrada al Estudio Oscuro: "
+            "una versión sobrenatural y retorcida del antiguo Joey Drew Studios. Allí conoce a "
+            "Wilson Arch, quien se presenta como un aliado que quiere ayudarla a escapar. "
+            "Audrey debe aprender las reglas de este mundo de tinta para sobrevivir."
         ),
         "setting_description": (
-            "La entrada al Estudio Oscuro: pasillos corporativos distorsionados que mezclan "
-            "la estética de los años 60 con elementos sobrenaturales de tinta."
+            "Los pasillos de entrada del Estudio Oscuro: una mezcla opresiva de arquitectura "
+            "industrial de los años 40 corrompida por la tinta negra y elementos sobrenaturales."
         ),
         "difficulty": "introductory",
-        "has_boss_fight": False,
-        "has_stealth_sections": False,
-        "has_puzzle_sections": True,
-        "approximate_duration_minutes": 50,
-        "protagonist": "Audrey",
-        "main_villain": "Wilson Arch (trasfondo)",
-        "new_characters_introduced": "Audrey, Gent Porters, Buddy Bendy (primera aparición como guía)",
-        "key_events": (
-            "— Audrey es absorbida por el portal de tinta.\n"
-            "— Exploración inicial del Estudio Oscuro.\n"
-            "— Primer encuentro con los Gent Porters.\n"
-            "— Primera visión de Buddy Bendy."
-        ),
-        "lore_revelations": (
-            "— La nueva corporación Gent ha industrializado la tecnología de la Máquina de Tinta.\n"
-            "— El Estudio Oscuro es una dimensión propia, no el estudio físico de BATIM.\n"
-            "— Buddy Bendy parece querer ayudar a Audrey."
-        ),
-        "composer": "theMeatly & NAB",
-        "trivia": (
-            "— BATDR fue desarrollado por Joey Drew Studios Inc. (el estudio real, no el ficticio) "
-            "y publicado por Rooster Teeth Games.\n"
-            "— El juego usa Unreal Engine en lugar del motor propietario de BATIM.\n"
-            "— Audrey puede atacar directamente a los enemigos, a diferencia de Henry."
-        ),
-        "reception_notes": (
-            "Lanzado en octubre de 2022, fue bien recibido por los fans del original aunque "
-            "algunos señalaron que la transición a un estudio más grande perdía parte de la "
-            "claustrofobia del original."
-        ),
-    },
-    {
-        "game": "batdr",
-        "number": 2,
-        "title": "The Old Studio",
-        "art_theme": "none",
-        "release_date": "2022-10-21",
-        "synopsis": (
-            "Audrey llega a una sección del Estudio Oscuro que replica el estudio original "
-            "de Joey Drew tal como era en los años 60. Descubre grabaciones y registros que "
-            "le cuentan la historia del estudio desde una perspectiva diferente a la de Henry. "
-            "Wilson Arch comienza a contactar con ella, presentándose como alguien que puede "
-            "ayudarla a escapar."
-        ),
-        "setting_description": (
-            "Réplica distorsionada del estudio original de BATIM: las mismas salas pero "
-            "más corrompidas por la tinta y el tiempo."
-        ),
-        "difficulty": "easy",
         "has_boss_fight": False,
         "has_stealth_sections": True,
         "has_puzzle_sections": True,
         "approximate_duration_minutes": 60,
         "protagonist": "Audrey",
-        "main_villain": "Wilson Arch (manipulador)",
-        "new_characters_introduced": "Wilson Arch (primera comunicación directa)",
+        "main_villain": "Ink creatures (hostigadores)",
+        "new_characters_introduced": "Audrey, Wilson Arch, Buddy Bendy, Allison Angel, Tom",
         "key_events": (
-            "— Exploración del estudio original replicado.\n"
-            "— Primeras grabaciones sobre la historia de Gent Corporation.\n"
-            "— Wilson Arch contacta con Audrey por primera vez directamente."
+            "— Audrey llega al Estudio Oscuro y conoce a Wilson Arch.\n"
+            "— Primera aparición de Buddy Bendy como guía ambiguo.\n"
+            "— Audrey descubre que tiene una conexión especial con la tinta.\n"
+            "— Establecimiento del objetivo: encontrar la salida con la ayuda de Wilson."
         ),
         "lore_revelations": (
-            "— Gent Corporation fue fundada sobre los restos de Joey Drew Studios.\n"
-            "— La tecnología de la Máquina de Tinta fue patentada y comercializada.\n"
-            "— Wilson tiene un plan específico para Audrey que aún no revela."
+            "— El Estudio Oscuro es una versión viva y consciente del antiguo estudio de Joey Drew.\n"
+            "— La tinta obedece a ciertas personas de formas inexplicables.\n"
+            "— Wilson Arch conoce los secretos del estudio mejor de lo que aparenta."
+        ),
+        "composer": "theMeatly & NAB",
+        "trivia": (
+            "— BATDR fue desarrollado por Joey Drew Studios Inc. (ahora Kindly Beast) "
+            "con un equipo mucho mayor que el del juego original.\n"
+            "— El cambio de protagonista a una mujer fue muy bien recibido por la comunidad."
+        ),
+    },
+    {
+        "game_key": "batdr",
+        "number": 2,
+        "title": "The Ink Below",
+        "art_theme": "none",
+        "release_date": "2022-10-21",
+        "synopsis": (
+            "Audrey desciende a los niveles inferiores del Estudio Oscuro, donde descubre "
+            "los orígenes de los experimentos de Joey Drew y los secretos de la Máquina de Tinta "
+            "original. Wilson revela más información sobre el estudio, aunque sus verdaderas "
+            "intenciones empiezan a ponerse en duda."
+        ),
+        "setting_description": (
+            "Las plantas subterráneas del estudio: laboratorios de tinta, archivos y "
+            "salas de máquinas que recuerdan los niveles profundos de BATIM."
+        ),
+        "difficulty": "medium",
+        "has_boss_fight": True,
+        "boss_name": "Nathan Arch",
+        "has_stealth_sections": True,
+        "has_puzzle_sections": True,
+        "approximate_duration_minutes": 75,
+        "protagonist": "Audrey",
+        "main_villain": "Wilson Arch (traición emergente) / Nathan Arch",
+        "new_characters_introduced": "Nathan Arch",
+        "key_events": (
+            "— Audrey explora los laboratorios de la Máquina de Tinta original.\n"
+            "— Encuentro y combate con Nathan Arch.\n"
+            "— Allison Angel revela sus dudas sobre Wilson.\n"
+            "— Audrey descubre que sus poderes de tinta son más fuertes de lo normal."
+        ),
+        "lore_revelations": (
+            "— Los hermanos Arch conocen el funcionamiento interno de la Máquina de Tinta.\n"
+            "— Joey Drew tenía planes que van más allá de simplemente dar vida a sus personajes.\n"
+            "— La tinta del estudio tiene su propia voluntad y 'elige' a ciertas personas."
         ),
         "composer": "theMeatly & NAB",
         "trivia": (
@@ -918,7 +748,7 @@ CHAPTERS_DATA: list[dict] = [
         ),
     },
     {
-        "game": "batdr",
+        "game_key": "batdr",
         "number": 3,
         "title": "The Keep",
         "art_theme": "none",
@@ -956,7 +786,7 @@ CHAPTERS_DATA: list[dict] = [
         "composer": "theMeatly & NAB",
     },
     {
-        "game": "batdr",
+        "game_key": "batdr",
         "number": 4,
         "title": "The Dark City",
         "art_theme": "none",
@@ -1008,37 +838,64 @@ CHAPTERS_DATA: list[dict] = [
 
 
 class Command(BaseCommand):
-    help = "Poblar la base de datos con personajes y capítulos de BATIM y BATDR"
+    help = "Poblar la base de datos con juegos, personajes y capítulos de BATIM y BATDR"
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
             "--clear",
             action="store_true",
-            help="Eliminar todos los personajes y capítulos existentes antes de insertar",
+            help="Eliminar todos los datos existentes antes de insertar",
         )
 
     def handle(self, *args, **options) -> None:
-        # Importa aquí para evitar problemas de inicialización de Django
-        from bendy_app.models import Character, Chapter  # ← ajusta a tu ruta real
+        from bendy_app.models import Character, Chapter, Game
 
         if options["clear"]:
-            self.stdout.write(
-                self.style.WARNING("Eliminando datos existentes..."))
+            self.stdout.write(self.style.WARNING("Eliminando datos existentes..."))
             Character.objects.all().delete()
             Chapter.objects.all().delete()
+            Game.objects.all().delete()
             self.stdout.write(self.style.SUCCESS("Datos eliminados."))
 
-        # ── Insertar personajes ────────────────────────────────────────────────
+        # ── 1. Juegos ──────────────────────────────────────────────────────────
+        self.stdout.write("Insertando juegos...")
+        game_cache: dict[str, Game] = {}
+
+        for data in GAMES_DATA:
+            game, created = Game.objects.update_or_create(
+                key=data["key"],
+                defaults=data,
+            )
+            game_cache[game.key] = game
+            status = "creado" if created else "actualizado"
+            self.stdout.write(f"  [{status}] {game.title}")
+
+        self.stdout.write(self.style.SUCCESS(f"Juegos: {len(game_cache)} procesados."))
+
+        # ── 2. Personajes ──────────────────────────────────────────────────────
         self.stdout.write("Insertando personajes...")
-        characters_created: int = 0
-        characters_updated: int = 0
+        characters_created = 0
+        characters_updated = 0
 
         for data in CHARACTERS_DATA:
+            primary_game_key: str = data.pop("primary_game_key")
+            extra_game_keys: list[str] = data.pop("extra_game_keys", [])
+
+            primary_game: Game = game_cache[primary_game_key]
             slug: str = slugify(data["name"])
+
             character, created = Character.objects.update_or_create(
                 slug=slug,
-                defaults={**data, "slug": slug},
+                defaults={**data, "slug": slug, "primary_game": primary_game},
             )
+
+            # Asignar juegos extra (M2M)
+            if extra_game_keys:
+                extra_games = [game_cache[k] for k in extra_game_keys if k in game_cache]
+                character.extra_games.set(extra_games)
+            else:
+                character.extra_games.clear()
+
             if created:
                 characters_created += 1
             else:
@@ -1050,19 +907,22 @@ class Command(BaseCommand):
             )
         )
 
-        # ── Insertar capítulos ─────────────────────────────────────────────────
+        # ── 3. Capítulos ───────────────────────────────────────────────────────
         self.stdout.write("Insertando capítulos...")
-        chapters_created: int = 0
-        chapters_updated: int = 0
+        chapters_created = 0
+        chapters_updated = 0
 
         for data in CHAPTERS_DATA:
-            slug: str = slugify(
-                f"{data['game']}-chapter-{data['number']}-{data['title']}")
+            game_key: str = data.pop("game_key")
+            game: Game = game_cache[game_key]
+            slug: str = slugify(f"{game_key}-chapter-{data['number']}-{data['title']}")
+
             chapter, created = Chapter.objects.update_or_create(
-                game=data["game"],
+                game=game,
                 number=data["number"],
-                defaults={**data, "slug": slug},
+                defaults={**data, "slug": slug, "game": game},
             )
+
             if created:
                 chapters_created += 1
             else:
@@ -1074,5 +934,4 @@ class Command(BaseCommand):
             )
         )
 
-        self.stdout.write(
-            self.style.SUCCESS("\n✓ Base de datos poblada correctamente."))
+        self.stdout.write(self.style.SUCCESS("\n✓ Base de datos poblada correctamente."))

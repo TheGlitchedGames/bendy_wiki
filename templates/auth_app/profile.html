@@ -49,10 +49,10 @@
             </div>
             {% if is_own_profile %}
             <div class="profile-actions ms-auto d-flex flex-column gap-2">
-                <a href="{{ url('bendy:profile_edit', args=[request.user.username]) }}" class="bendy-btn bendy-btn-primary">
+                <a href="{{ url('auth:profile_edit', args=[request.user.username]) }}" class="bendy-btn bendy-btn-primary">
                     <i class="fas fa-edit me-2"></i>Editar perfil
                 </a>
-                <a href="{{ url('bendy:password_change', args=[request.user.username]) }}" class="bendy-btn bendy-btn-outline-sm">
+                <a href="{{ url('auth:password_change', args=[request.user.username]) }}" class="bendy-btn bendy-btn-outline-sm">
                     <i class="fas fa-key me-2"></i>Cambiar contraseña
                 </a>
             </div>
@@ -163,7 +163,7 @@
                 <strong>Eliminar cuenta</strong>
                 <p class="mb-0 text-muted">Una vez eliminada, no podrá recuperarse.</p>
             </div>
-            <a href="{{ url('bendy:delete_account') }}" class="bendy-btn bendy-btn-danger">
+            <a href="{{ url('auth:delete_account') }}" class="bendy-btn bendy-btn-danger">
                 <i class="fas fa-trash-alt me-2"></i>Eliminar mi cuenta
             </a>
         </div>

@@ -62,11 +62,11 @@
                     </div>
                     <h1 class="auth-form-title">Crear Cuenta</h1>
                     <p class="auth-form-subtitle">¿Ya tienes cuenta?
-                        <a href="{{ url('bendy:login') }}" class="auth-link">Inicia sesión</a>
+                        <a href="{{ url('auth:login') }}" class="auth-link">Inicia sesión</a>
                     </p>
                 </div>
 
-                <form method="post" action="{{ url('bendy:register') }}" class="bendy-form" id="registerForm" novalidate>
+                <form method="post" action="{{ url('auth:register') }}" class="bendy-form" id="registerForm" novalidate>
                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                     <div class="row g-3">

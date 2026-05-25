@@ -39,7 +39,7 @@
                     <button type="submit" class="bendy-btn bendy-btn-danger">
                         <i class="fas fa-trash-alt me-2"></i>Eliminar mi cuenta
                     </button>
-                    <a href="{{ url('bendy:profile', args=[request.user.username]) }}" class="bendy-btn bendy-btn-ghost">
+                    <a href="{{ url('auth:profile', args=[request.user.username]) }}" class="bendy-btn bendy-btn-ghost">
                         Cancelar
                     </a>
                 </div>

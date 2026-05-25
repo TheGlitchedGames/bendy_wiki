@@ -60,11 +60,11 @@
                     </div>
                     <h1 class="auth-form-title">Iniciar Sesión</h1>
                     <p class="auth-form-subtitle">¿Nuevo en el estudio?
-                        <a href="{{ url('bendy:register') }}" class="auth-link">Regístrate aquí</a>
+                        <a href="{{ url('auth:register') }}" class="auth-link">Regístrate aquí</a>
                     </p>
                 </div>
 
-                <form method="post" action="{{ url('bendy:login') }}" class="bendy-form" id="loginForm" novalidate>
+                <form method="post" action="{{ url('auth:login') }}" class="bendy-form" id="loginForm" novalidate>
                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                     <div class="form-group-bendy" id="fg-username">

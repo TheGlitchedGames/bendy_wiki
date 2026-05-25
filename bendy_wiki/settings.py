@@ -51,14 +51,17 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'django_filters',
+    'debug_toolbar',
 
     # Local apps
     'bendy_app.apps.BendyAppConfig',
+    'auth_app.apps.AuthAppConfig'
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -103,15 +106,8 @@ WSGI_APPLICATION = 'bendy_wiki.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        "NAME": config("DB_NAME", default="bendy_db"),
-        "USER": config("DB_USER", default="gusalmonacid"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="3306"),
-        "OPTIONS": {
-            "charset": "utf8mb4"
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3"
     }
 }
 
@@ -157,7 +153,33 @@ MEDIA_ROOT: Path = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL: str = "bendy_app.BendyUser"
+AUTH_USER_MODEL: str = "auth_app.BendyUser"
+
+# ── django-debug-toolbar ──────────────────────────────────────────────────────
+# Solo se activa cuando DEBUG=True. INTERNAL_IPS controla qué IPs ven el panel.
+
+INTERNAL_IPS: list[str] = ["127.0.0.1", "::1"]
+
+DEBUG_TOOLBAR_CONFIG: dict = {
+    "PANELS": [
+        "debug_toolbar.panels.history.HistoryPanel",
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+    ],
+    # Jinja2 no usa el tag {% debug_toolbar %} de Django Templates, así que
+    # usamos un callback propio que simplemente comprueba DEBUG e INTERNAL_IPS.
+    "SHOW_TOOLBAR_CALLBACK": "bendy_wiki.debug.show_toolbar",
+}
 
 # Sweetify
 SWEETIFY_SWEETALERT_JS_URL: str = "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"

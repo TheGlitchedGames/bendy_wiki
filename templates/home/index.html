@@ -18,10 +18,11 @@
             objetos y los misterios más oscuros de los dos universos de Bendy.
         </p>
         <div class="hero-cta d-flex gap-3 justify-content-center flex-wrap">
-            <a href="#" class="bendy-btn bendy-btn-primary bendy-btn-lg">
+            {# ── Botones del hero: por ahora sin URL de juego, pero characters sí está listo ── #}
+            <a href="#games" class="bendy-btn bendy-btn-primary bendy-btn-lg">
                 <i class="fas fa-book-open me-2"></i> Explorar BATIM
             </a>
-            <a href="#" class="bendy-btn bendy-btn-secondary bendy-btn-lg">
+            <a href="#games" class="bendy-btn bendy-btn-secondary bendy-btn-lg">
                 <i class="fas fa-moon me-2"></i> Explorar BATDR
             </a>
         </div>
@@ -37,7 +38,7 @@
 </div>
 
 <!-- JUEGOS SECTION -->
-<section class="games-section py-5">
+<section class="games-section py-5" id="games">
     <div class="section-header text-center mb-5">
         <div class="section-eyebrow">El Universo</div>
         <h2 class="section-title">Los Juegos</h2>
@@ -59,8 +60,10 @@
                         <span><i class="fas fa-users"></i> +20 Personajes</span>
                         <span><i class="fas fa-box"></i> +100 Objetos</span>
                     </div>
-                    <a href="#" class="bendy-btn bendy-btn-primary mt-3">
-                        Ver Wiki BATIM <i class="fas fa-arrow-right ms-2"></i>
+                    {# ── Enlace a personajes filtrados por juego ── #}
+                    <a href="{{ url('bendy:character_list') }}?primary_game=batim"
+                       class="bendy-btn bendy-btn-primary mt-3">
+                        Ver Personajes BATIM <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
                 <div class="game-card-decoration">
@@ -84,8 +87,9 @@
                         <span><i class="fas fa-users"></i> +15 Personajes</span>
                         <span><i class="fas fa-box"></i> +80 Objetos</span>
                     </div>
-                    <a href="#" class="bendy-btn bendy-btn-secondary mt-3">
-                        Ver Wiki BATDR <i class="fas fa-arrow-right ms-2"></i>
+                    <a href="{{ url('bendy:character_list') }}?primary_game=batdr"
+                       class="bendy-btn bendy-btn-secondary mt-3">
+                        Ver Personajes BATDR <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
                 <div class="game-card-decoration">
@@ -94,6 +98,13 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    {# ── Acceso rápido a todos los personajes ── #}
+    <div class="text-center mt-4">
+        <a href="{{ url('bendy:character_list') }}" class="bendy-btn bendy-btn-ghost">
+            <i class="fas fa-users me-2"></i> Ver todos los personajes
+        </a>
     </div>
 </section>
 
@@ -114,7 +125,7 @@
                     <ul class="contributor-list">
                         {% for user in top_contributors %}
                         <li class="contributor-item">
-                            <a href="{{ url('bendy:profile', kwargs={'username': user.username}) }}" class="contributor-link">
+                            <a href="{{ url('auth:profile', kwargs={'username': user.username}) }}" class="contributor-link">
                                 <span class="contributor-rank">#{{ loop.index }}</span>
                                 <span class="contributor-avatar">
                                     {% if user.avatar %}
@@ -145,7 +156,7 @@
                     <ul class="contributor-list">
                         {% for user in recent_users %}
                         <li class="contributor-item">
-                            <a href="{{ url('bendy:profile', args=[user.username]) }}" class="contributor-link">
+                            <a href="{{ url('auth:profile', args=[user.username]) }}" class="contributor-link">
                                 <span class="contributor-avatar">
                                     {% if user.avatar %}
                                         <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
@@ -170,7 +181,7 @@
         <div class="join-cta">
             <h3 class="join-cta-title">¿Listo para unirte al Estudio?</h3>
             <p class="join-cta-desc">Regístrate y comienza a contribuir a la mayor wiki de Bendy en español.</p>
-            <a href="{{ url('bendy:register') }}" class="bendy-btn bendy-btn-primary bendy-btn-lg">
+            <a href="{{ url('auth:register') }}" class="bendy-btn bendy-btn-primary bendy-btn-lg">
                 <i class="fas fa-feather-alt me-2"></i> Unirse ahora
             </a>
         </div>

@@ -22,7 +22,7 @@
         <div class="row g-3" id="userGrid">
             {% for user in users %}
             <div class="col-sm-6 col-md-4 col-lg-3">
-                <a href="{{ url('bendy:profile', args=[request.user.username]) }}" class="user-card-link">
+                <a href="{{ url('auth:profile', args=[request.user.username]) }}" class="user-card-link">
                     <div class="user-card" data-role="{{ user.role }}">
                         <div class="user-card-avatar">
                             {% if user.avatar %}
@@ -90,7 +90,7 @@
             <div class="empty-state-icon"><i class="fas fa-users"></i></div>
             <h3>Aún no hay miembros</h3>
             <p class="text-muted">¡Sé el primero en unirte a la wiki!</p>
-            <a href="{{ url('bendy:register') }}" class="bendy-btn bendy-btn-primary mt-3">
+            <a href="{{ url('auth:register') }}" class="bendy-btn bendy-btn-primary mt-3">
                 <i class="fas fa-feather-alt me-2"></i>Registrarse
             </a>
         </div>
