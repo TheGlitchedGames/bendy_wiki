@@ -75,17 +75,10 @@ ROOT_URLCONF = 'bendy_wiki.urls'
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.jinja2.Jinja2",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": False,
-        "OPTIONS": {
-            "environment": "bendy_wiki.jinja2.environment",
-            "auto_reload": DEBUG,
-        },
-    },
-    {
+        # ── Django Templates (único backend) ─────────────────────────────────
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates" / "django"],
+        # Busca primero en templates/ del proyecto raíz, luego en cada app
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -94,8 +87,10 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            # Opcional: activa {% load static %} automático en todos los templates
+            # "builtins": ["django.templatetags.static"],
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = 'bendy_wiki.wsgi.application'

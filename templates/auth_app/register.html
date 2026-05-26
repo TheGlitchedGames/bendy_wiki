@@ -1,219 +1,224 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Registrarse{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ static('css/auth.css') }}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="auth-page auth-page-register">
-    <div class="auth-container auth-container-wide" id="authContainer">
+    <div class="auth-page auth-page-register">
+        <div class="auth-container auth-container-wide" id="authContainer">
 
-        <div class="auth-deco auth-deco-left">
-            <div class="deco-ink-drop" style="top:8%;animation-delay:0s"></div>
-            <div class="deco-ink-drop" style="top:30%;animation-delay:0.3s"></div>
-            <div class="deco-ink-drop" style="top:55%;animation-delay:0.7s"></div>
-            <div class="deco-ink-drop" style="top:80%;animation-delay:1.1s"></div>
-            <div class="deco-vertical-line"></div>
-        </div>
-
-        <!-- Branding -->
-        <div class="auth-branding">
-            <div class="auth-brand-ink-bg" id="authInkBg"></div>
-            <div class="auth-brand-content">
-                <div class="auth-brand-symbol">✦</div>
-                <h2 class="auth-brand-title">Únete al<br>Estudio</h2>
-                <p class="auth-brand-quote">
-                    <em>"Every generation has its Joey Drew..."</em>
-                </p>
-                <div class="auth-brand-divider"></div>
-                <p class="auth-brand-desc">
-                    Crea tu cuenta y conviértete en parte de la comunidad.
-                    Edita artículos, gana puntos de tinta y deja tu huella en el estudio.
-                </p>
-                <div class="register-perks">
-                    <div class="perk-item">
-                        <i class="fas fa-edit"></i>
-                        <span>Edita y crea artículos</span>
-                    </div>
-                    <div class="perk-item">
-                        <i class="fas fa-star"></i>
-                        <span>Gana puntos de tinta</span>
-                    </div>
-                    <div class="perk-item">
-                        <i class="fas fa-users"></i>
-                        <span>Únete a la comunidad</span>
-                    </div>
-                    <div class="perk-item">
-                        <i class="fas fa-trophy"></i>
-                        <span>Sube en el ranking</span>
-                    </div>
-                </div>
+            <div class="auth-deco auth-deco-left">
+                <div class="deco-ink-drop" style="top:8%;animation-delay:0s"></div>
+                <div class="deco-ink-drop" style="top:30%;animation-delay:0.3s"></div>
+                <div class="deco-ink-drop" style="top:55%;animation-delay:0.7s"></div>
+                <div class="deco-ink-drop" style="top:80%;animation-delay:1.1s"></div>
+                <div class="deco-vertical-line"></div>
             </div>
-        </div>
 
-        <!-- Formulario -->
-        <div class="auth-form-panel">
-            <div class="auth-form-inner">
-                <div class="auth-form-header">
-                    <div class="auth-form-icon">
-                        <i class="fas fa-feather-alt"></i>
-                    </div>
-                    <h1 class="auth-form-title">Crear Cuenta</h1>
-                    <p class="auth-form-subtitle">¿Ya tienes cuenta?
-                        <a href="{{ url('auth:login') }}" class="auth-link">Inicia sesión</a>
+            <!-- Branding -->
+            <div class="auth-branding">
+                <div class="auth-brand-ink-bg" id="authInkBg"></div>
+                <div class="auth-brand-content">
+                    <div class="auth-brand-symbol">✦</div>
+                    <h2 class="auth-brand-title">Únete al<br>Estudio</h2>
+                    <p class="auth-brand-quote">
+                        <em>"Every generation has its Joey Drew..."</em>
                     </p>
+                    <div class="auth-brand-divider"></div>
+                    <p class="auth-brand-desc">
+                        Crea tu cuenta y conviértete en parte de la comunidad.
+                        Edita artículos, gana puntos de tinta y deja tu huella en el estudio.
+                    </p>
+                    <div class="register-perks">
+                        <div class="perk-item">
+                            <i class="fas fa-edit"></i>
+                            <span>Edita y crea artículos</span>
+                        </div>
+                        <div class="perk-item">
+                            <i class="fas fa-star"></i>
+                            <span>Gana puntos de tinta</span>
+                        </div>
+                        <div class="perk-item">
+                            <i class="fas fa-users"></i>
+                            <span>Únete a la comunidad</span>
+                        </div>
+                        <div class="perk-item">
+                            <i class="fas fa-trophy"></i>
+                            <span>Sube en el ranking</span>
+                        </div>
+                    </div>
                 </div>
-
-                <form method="post" action="{{ url('auth:register') }}" class="bendy-form" id="registerForm" novalidate>
-                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <div class="form-group-bendy">
-                                <label for="id_username" class="bendy-label">
-                                    <i class="fas fa-user me-2"></i>{{ form.username.label }}
-                                </label>
-                                {{ form.username }}
-                                {% if form.username.errors %}
-                                <div class="bendy-field-error">
-                                    {% for e in form.username.errors %}<span>{{ e }}</span>{% endfor %}
-                                </div>
-                                {% endif %}
-                                <div class="bendy-field-hint">Tu nombre público en la wiki.</div>
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="form-group-bendy">
-                                <label for="id_email" class="bendy-label">
-                                    <i class="fas fa-envelope me-2"></i>{{ form.email.label }}
-                                </label>
-                                {{ form.email }}
-                                {% if form.email.errors %}
-                                <div class="bendy-field-error">
-                                    {% for e in form.email.errors %}<span>{{ e }}</span>{% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group-bendy">
-                                <label for="id_first_name" class="bendy-label">
-                                    <i class="fas fa-id-card me-2"></i>{{ form.first_name.label }}
-                                </label>
-                                {{ form.first_name }}
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group-bendy">
-                                <label for="id_last_name" class="bendy-label">
-                                    <i class="fas fa-id-card me-2"></i>{{ form.last_name.label }}
-                                </label>
-                                {{ form.last_name }}
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group-bendy">
-                                <label for="id_password1" class="bendy-label">
-                                    <i class="fas fa-lock me-2"></i>{{ form.password1.label }}
-                                </label>
-                                <div class="input-password-wrapper">
-                                    {{ form.password1 }}
-                                    <button type="button" class="toggle-password" data-target="id_password1" aria-label="Mostrar">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                {% if form.password1.errors %}
-                                <div class="bendy-field-error">
-                                    {% for e in form.password1.errors %}<span>{{ e }}</span>{% endfor %}
-                                </div>
-                                {% endif %}
-                                <!-- Barra de fortaleza -->
-                                <div class="password-strength-bar mt-1">
-                                    <div class="strength-fill" id="strengthFill"></div>
-                                </div>
-                                <div class="strength-label" id="strengthLabel"></div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group-bendy">
-                                <label for="id_password2" class="bendy-label">
-                                    <i class="fas fa-lock me-2"></i>{{ form.password2.label }}
-                                </label>
-                                <div class="input-password-wrapper">
-                                    {{ form.password2 }}
-                                    <button type="button" class="toggle-password" data-target="id_password2" aria-label="Mostrar">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                {% if form.password2.errors %}
-                                <div class="bendy-field-error">
-                                    {% for e in form.password2.errors %}<span>{{ e }}</span>{% endfor %}
-                                </div>
-                                {% endif %}
-                                <div class="match-indicator" id="matchIndicator"></div>
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="form-group-bendy">
-                                <label for="id_favorite_game" class="bendy-label">
-                                    <i class="fas fa-gamepad me-2"></i>{{ form.favorite_game.label }}
-                                </label>
-                                {{ form.favorite_game }}
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="bendy-check-group">
-                                {{ form.terms }}
-                                <label for="id_terms" class="bendy-check-label">
-                                    Acepto los <a href="#" class="auth-link">términos y condiciones</a>
-                                    de la wiki y el código de conducta.
-                                </label>
-                            </div>
-                            {% if form.terms.errors %}
-                            <div class="bendy-field-error mt-1">
-                                {% for e in form.terms.errors %}<span>{{ e }}</span>{% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    {% if form.non_field_errors() %}
-                    <div class="bendy-form-errors mt-3">
-                        {% for error in form.non_field_errors() %}
-                        <p class="bendy-non-field-error">
-                            <i class="fas fa-times-circle me-2"></i>{{ error }}
-                        </p>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-
-                    <button type="submit" class="bendy-btn bendy-btn-primary bendy-btn-full bendy-btn-lg mt-4" id="registerBtn">
-                        <span class="btn-text"><i class="fas fa-feather-alt me-2"></i>Crear mi cuenta</span>
-                        <span class="btn-loading d-none"><i class="fas fa-spinner fa-spin me-2"></i>Registrando...</span>
-                    </button>
-                </form>
             </div>
-        </div>
 
-        <div class="auth-deco auth-deco-right">
-            <div class="deco-ink-drop" style="top:15%;animation-delay:0.2s"></div>
-            <div class="deco-ink-drop" style="top:45%;animation-delay:0.6s"></div>
-            <div class="deco-ink-drop" style="top:72%;animation-delay:1.0s"></div>
-            <div class="deco-vertical-line"></div>
+            <!-- Formulario -->
+            <div class="auth-form-panel">
+                <div class="auth-form-inner">
+                    <div class="auth-form-header">
+                        <div class="auth-form-icon">
+                            <i class="fas fa-feather-alt"></i>
+                        </div>
+                        <h1 class="auth-form-title">Crear Cuenta</h1>
+                        <p class="auth-form-subtitle">¿Ya tienes cuenta?
+                            <a href="{% url 'auth:login' %}" class="auth-link">Inicia sesión</a>
+                        </p>
+                    </div>
+
+                    <form method="post" action="{% url 'auth:register' %}" class="bendy-form" id="registerForm"
+                          novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="form-group-bendy">
+                                    <label for="id_username" class="bendy-label">
+                                        <i class="fas fa-user me-2"></i>{{ form.username.label }}
+                                    </label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="bendy-field-error">
+                                            {% for e in form.username.errors %}<span>{{ e }}</span>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="bendy-field-hint">Tu nombre público en la wiki.</div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group-bendy">
+                                    <label for="id_email" class="bendy-label">
+                                        <i class="fas fa-envelope me-2"></i>{{ form.email.label }}
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="bendy-field-error">
+                                            {% for e in form.email.errors %}<span>{{ e }}</span>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group-bendy">
+                                    <label for="id_first_name" class="bendy-label">
+                                        <i class="fas fa-id-card me-2"></i>{{ form.first_name.label }}
+                                    </label>
+                                    {{ form.first_name }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group-bendy">
+                                    <label for="id_last_name" class="bendy-label">
+                                        <i class="fas fa-id-card me-2"></i>{{ form.last_name.label }}
+                                    </label>
+                                    {{ form.last_name }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group-bendy">
+                                    <label for="id_password1" class="bendy-label">
+                                        <i class="fas fa-lock me-2"></i>{{ form.password1.label }}
+                                    </label>
+                                    <div class="input-password-wrapper">
+                                        {{ form.password1 }}
+                                        <button type="button" class="toggle-password" data-target="id_password1"
+                                                aria-label="Mostrar">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.password1.errors %}
+                                        <div class="bendy-field-error">
+                                            {% for e in form.password1.errors %}<span>{{ e }}</span>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="password-strength-bar mt-1">
+                                        <div class="strength-fill" id="strengthFill"></div>
+                                    </div>
+                                    <div class="strength-label" id="strengthLabel"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group-bendy">
+                                    <label for="id_password2" class="bendy-label">
+                                        <i class="fas fa-lock me-2"></i>{{ form.password2.label }}
+                                    </label>
+                                    <div class="input-password-wrapper">
+                                        {{ form.password2 }}
+                                        <button type="button" class="toggle-password" data-target="id_password2"
+                                                aria-label="Mostrar">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.password2.errors %}
+                                        <div class="bendy-field-error">
+                                            {% for e in form.password2.errors %}<span>{{ e }}</span>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="match-indicator" id="matchIndicator"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group-bendy">
+                                    <label for="id_favorite_game" class="bendy-label">
+                                        <i class="fas fa-gamepad me-2"></i>{{ form.favorite_game.label }}
+                                    </label>
+                                    {{ form.favorite_game }}
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="bendy-check-group">
+                                    {{ form.terms }}
+                                    <label for="id_terms" class="bendy-check-label">
+                                        Acepto los <a href="#" class="auth-link">términos y condiciones</a>
+                                        de la wiki y el código de conducta.
+                                    </label>
+                                </div>
+                                {% if form.terms.errors %}
+                                    <div class="bendy-field-error mt-1">
+                                        {% for e in form.terms.errors %}<span>{{ e }}</span>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="bendy-form-errors mt-3">
+                                {% for error in form.non_field_errors %}
+                                    <p class="bendy-non-field-error">
+                                        <i class="fas fa-times-circle me-2"></i>{{ error }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <button type="submit" class="bendy-btn bendy-btn-primary bendy-btn-full bendy-btn-lg mt-4"
+                                id="registerBtn">
+                            <span class="btn-text"><i class="fas fa-feather-alt me-2"></i>Crear mi cuenta</span>
+                            <span class="btn-loading d-none"><i
+                                    class="fas fa-spinner fa-spin me-2"></i>Registrando...</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="auth-deco auth-deco-right">
+                <div class="deco-ink-drop" style="top:15%;animation-delay:0.2s"></div>
+                <div class="deco-ink-drop" style="top:45%;animation-delay:0.6s"></div>
+                <div class="deco-ink-drop" style="top:72%;animation-delay:1.0s"></div>
+                <div class="deco-vertical-line"></div>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ static('js/auth.js') }}"></script>
+    <script src="{% static 'js/auth.js' %}"></script>
 {% endblock %}

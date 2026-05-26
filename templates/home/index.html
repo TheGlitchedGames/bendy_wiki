@@ -1,162 +1,160 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
-<!-- HERO SECTION -->
-<section class="bendy-hero" id="hero">
-    <div class="hero-ink-bg"></div>
-    <div class="hero-content text-center">
-        <div class="hero-eyebrow">✦ Wiki No Oficial ✦</div>
-        <h1 class="hero-title" id="heroTitle">
-            <span class="hero-title-line">BENDY</span>
-            <span class="hero-title-sub">and the</span>
-            <span class="hero-title-line hero-title-ink">INK MACHINE</span>
-        </h1>
-        <p class="hero-description">
-            La enciclopedia definitiva del Estudio de Tinta. Explora personajes, capítulos,
-            objetos y los misterios más oscuros de los dos universos de Bendy.
-        </p>
-        <div class="hero-cta d-flex gap-3 justify-content-center flex-wrap">
-            {# ── Botones del hero: por ahora sin URL de juego, pero characters sí está listo ── #}
-            <a href="#games" class="bendy-btn bendy-btn-primary bendy-btn-lg">
-                <i class="fas fa-book-open me-2"></i> Explorar BATIM
-            </a>
-            <a href="#games" class="bendy-btn bendy-btn-secondary bendy-btn-lg">
-                <i class="fas fa-moon me-2"></i> Explorar BATDR
-            </a>
+    <!-- HERO SECTION -->
+    <section class="bendy-hero" id="hero">
+        <div class="hero-ink-bg"></div>
+        <div class="hero-content text-center">
+            <div class="hero-eyebrow">✦ Wiki No Oficial ✦</div>
+            <h1 class="hero-title" id="heroTitle">
+                <span class="hero-title-line">BENDY</span>
+                <span class="hero-title-sub">and the</span>
+                <span class="hero-title-line hero-title-ink">INK MACHINE</span>
+            </h1>
+            <p class="hero-description">
+                La enciclopedia definitiva del Estudio de Tinta. Explora personajes, capítulos,
+                objetos y los misterios más oscuros de los dos universos de Bendy.
+            </p>
+            <div class="hero-cta d-flex gap-3 justify-content-center flex-wrap">
+                <a href="#games" class="bendy-btn bendy-btn-primary bendy-btn-lg">
+                    <i class="fas fa-book-open me-2"></i> Explorar BATIM
+                </a>
+                <a href="#games" class="bendy-btn bendy-btn-secondary bendy-btn-lg">
+                    <i class="fas fa-moon me-2"></i> Explorar BATDR
+                </a>
+            </div>
         </div>
-    </div>
-    <div class="hero-ink-drip-container" id="heroInkDrips"></div>
-</section>
+        <div class="hero-ink-drip-container" id="heroInkDrips"></div>
+    </section>
 
-<!-- SEPARADOR DE TINTA -->
-<div class="ink-separator">
-    <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
-        <path d="M0,0 Q360,60 720,30 Q1080,0 1440,40 L1440,60 L0,60 Z" fill="var(--ink-black)"></path>
-    </svg>
-</div>
-
-<!-- JUEGOS SECTION -->
-<section class="games-section py-5" id="games">
-    <div class="section-header text-center mb-5">
-        <div class="section-eyebrow">El Universo</div>
-        <h2 class="section-title">Los Juegos</h2>
-        <div class="section-divider"><span>✦</span></div>
+    <!-- SEPARADOR DE TINTA -->
+    <div class="ink-separator">
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+            <path d="M0,0 Q360,60 720,30 Q1080,0 1440,40 L1440,60 L0,60 Z" fill="var(--ink-black)"></path>
+        </svg>
     </div>
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="game-card batim-card" data-game="batim">
-                <div class="game-card-glow"></div>
-                <div class="game-card-content">
-                    <div class="game-badge">2017 — 2018</div>
-                    <h3 class="game-title">Bendy and the<br><span>Ink Machine</span></h3>
-                    <p class="game-desc">
-                        Henry Stein regresa al viejo estudio de animación donde trabajó décadas atrás,
-                        solo para descubrir que algo siniestro ha cobrado vida entre las paredes manchadas de tinta.
-                    </p>
-                    <div class="game-stats">
-                        <span><i class="fas fa-layer-group"></i> 5 Capítulos</span>
-                        <span><i class="fas fa-users"></i> +20 Personajes</span>
-                        <span><i class="fas fa-box"></i> +100 Objetos</span>
+
+    <!-- JUEGOS SECTION -->
+    <section class="games-section py-5" id="games">
+        <div class="section-header text-center mb-5">
+            <div class="section-eyebrow">El Universo</div>
+            <h2 class="section-title">Los Juegos</h2>
+            <div class="section-divider"><span>✦</span></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="game-card batim-card" data-game="batim">
+                    <div class="game-card-glow"></div>
+                    <div class="game-card-content">
+                        <div class="game-badge">2017 — 2018</div>
+                        <h3 class="game-title">Bendy and the<br><span>Ink Machine</span></h3>
+                        <p class="game-desc">
+                            Henry Stein regresa al viejo estudio de animación donde trabajó décadas atrás,
+                            solo para descubrir que algo siniestro ha cobrado vida entre las paredes manchadas de tinta.
+                        </p>
+                        <div class="game-stats">
+                            <span><i class="fas fa-layer-group"></i> 5 Capítulos</span>
+                            <span><i class="fas fa-users"></i> +20 Personajes</span>
+                            <span><i class="fas fa-box"></i> +100 Objetos</span>
+                        </div>
+                        <a href="{% url 'bendy:character_list' %}?primary_game=batim"
+                           class="bendy-btn bendy-btn-primary mt-3">
+                            Ver Personajes BATIM <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
                     </div>
-                    {# ── Enlace a personajes filtrados por juego ── #}
-                    <a href="{{ url('bendy:character_list') }}?primary_game=batim"
-                       class="bendy-btn bendy-btn-primary mt-3">
-                        Ver Personajes BATIM <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
+                    <div class="game-card-decoration">
+                        <div class="ink-splash ink-splash-1"></div>
+                        <div class="ink-splash ink-splash-2"></div>
+                    </div>
                 </div>
-                <div class="game-card-decoration">
-                    <div class="ink-splash ink-splash-1"></div>
-                    <div class="ink-splash ink-splash-2"></div>
+            </div>
+            <div class="col-lg-6">
+                <div class="game-card batdr-card" data-game="batdr">
+                    <div class="game-card-glow batdr-glow"></div>
+                    <div class="game-card-content">
+                        <div class="game-badge batdr-badge">2022</div>
+                        <h3 class="game-title">Bendy and the<br><span class="batdr-title">Dark Revival</span></h3>
+                        <p class="game-desc">
+                            Audrey regresa a un estudio aún más retorcido y oscuro. Una nueva historia,
+                            nuevos monstruos y secretos más profundos aguardan en las sombras del tintero.
+                        </p>
+                        <div class="game-stats">
+                            <span><i class="fas fa-layer-group"></i> 5 Actos</span>
+                            <span><i class="fas fa-users"></i> +15 Personajes</span>
+                            <span><i class="fas fa-box"></i> +80 Objetos</span>
+                        </div>
+                        <a href="{% url 'bendy:character_list' %}?primary_game=batdr"
+                           class="bendy-btn bendy-btn-secondary mt-3">
+                            Ver Personajes BATDR <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                    <div class="game-card-decoration">
+                        <div class="ink-splash ink-splash-3"></div>
+                        <div class="ink-splash ink-splash-4"></div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="game-card batdr-card" data-game="batdr">
-                <div class="game-card-glow batdr-glow"></div>
-                <div class="game-card-content">
-                    <div class="game-badge batdr-badge">2022</div>
-                    <h3 class="game-title">Bendy and the<br><span class="batdr-title">Dark Revival</span></h3>
-                    <p class="game-desc">
-                        Audrey regresa a un estudio aún más retorcido y oscuro. Una nueva historia,
-                        nuevos monstruos y secretos más profundos aguardan en las sombras del tintero.
-                    </p>
-                    <div class="game-stats">
-                        <span><i class="fas fa-layer-group"></i> 5 Actos</span>
-                        <span><i class="fas fa-users"></i> +15 Personajes</span>
-                        <span><i class="fas fa-box"></i> +80 Objetos</span>
-                    </div>
-                    <a href="{{ url('bendy:character_list') }}?primary_game=batdr"
-                       class="bendy-btn bendy-btn-secondary mt-3">
-                        Ver Personajes BATDR <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
-                <div class="game-card-decoration">
-                    <div class="ink-splash ink-splash-3"></div>
-                    <div class="ink-splash ink-splash-4"></div>
-                </div>
-            </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'bendy:character_list' %}" class="bendy-btn bendy-btn-ghost">
+                <i class="fas fa-users me-2"></i> Ver todos los personajes
+            </a>
         </div>
-    </div>
+    </section>
 
-    {# ── Acceso rápido a todos los personajes ── #}
-    <div class="text-center mt-4">
-        <a href="{{ url('bendy:character_list') }}" class="bendy-btn bendy-btn-ghost">
-            <i class="fas fa-users me-2"></i> Ver todos los personajes
-        </a>
-    </div>
-</section>
-
-<!-- COMUNIDAD SECTION -->
-<section class="community-section py-5 mt-3">
-    <div class="section-header text-center mb-5">
-        <div class="section-eyebrow">Nuestros Archivadores</div>
-        <h2 class="section-title">La Comunidad</h2>
-        <div class="section-divider"><span>✦</span></div>
-    </div>
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="community-block">
-                <h4 class="community-block-title">
-                    <i class="fas fa-star me-2 text-warning"></i> Mejores Contribuidores
-                </h4>
-                {% if top_contributors %}
-                    <ul class="contributor-list">
-                        {% for user in top_contributors %}
-                        <li class="contributor-item">
-                            <a href="{{ url('auth:profile', kwargs={'username': user.username}) }}" class="contributor-link">
-                                <span class="contributor-rank">#{{ loop.index }}</span>
-                                <span class="contributor-avatar">
+    <!-- COMUNIDAD SECTION -->
+    <section class="community-section py-5 mt-3">
+        <div class="section-header text-center mb-5">
+            <div class="section-eyebrow">Nuestros Archivadores</div>
+            <h2 class="section-title">La Comunidad</h2>
+            <div class="section-divider"><span>✦</span></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="community-block">
+                    <h4 class="community-block-title">
+                        <i class="fas fa-star me-2 text-warning"></i> Mejores Contribuidores
+                    </h4>
+                    {% if top_contributors %}
+                        <ul class="contributor-list">
+                            {% for user in top_contributors %}
+                                <li class="contributor-item">
+                                    <a href="{% url 'auth:profile' user.username %}" class="contributor-link">
+                                        <span class="contributor-rank">#{{ forloop.counter }}</span>
+                                        <span class="contributor-avatar">
                                     {% if user.avatar %}
                                         <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
                                     {% else %}
                                         <i class="fas fa-user-circle"></i>
                                     {% endif %}
                                 </span>
-                                <span class="contributor-name">{{ user.display_name }}</span>
-                                <span class="contributor-points">
+                                        <span class="contributor-name">{{ user.display_name }}</span>
+                                        <span class="contributor-points">
                                     <i class="fas fa-star"></i> {{ user.ink_points }}
                                 </span>
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted fst-italic">Aún no hay contribuidores. ¡Sé el primero!</p>
-                {% endif %}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted fst-italic">Aún no hay contribuidores. ¡Sé el primero!</p>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="community-block">
-                <h4 class="community-block-title">
-                    <i class="fas fa-clock me-2"></i> Últimos en unirse
-                </h4>
-                {% if recent_users %}
-                    <ul class="contributor-list">
-                        {% for user in recent_users %}
-                        <li class="contributor-item">
-                            <a href="{{ url('auth:profile', args=[user.username]) }}" class="contributor-link">
+            <div class="col-lg-6">
+                <div class="community-block">
+                    <h4 class="community-block-title">
+                        <i class="fas fa-clock me-2"></i> Últimos en unirse
+                    </h4>
+                    {% if recent_users %}
+                        <ul class="contributor-list">
+                            {% for user in recent_users %}
+                                <li class="contributor-item">
+                                    <a href="{% url 'auth:profile' user.username %}" class="contributor-link">
                                 <span class="contributor-avatar">
                                     {% if user.avatar %}
                                         <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
@@ -164,32 +162,32 @@
                                         <i class="fas fa-user-circle"></i>
                                     {% endif %}
                                 </span>
-                                <span class="contributor-name">{{ user.display_name }}</span>
-                                <span class="contributor-role role-{{ user.role }}">{{ user.get_role_display() }}</span>
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted fst-italic">La wiki aún no tiene miembros registrados.</p>
-                {% endif %}
+                                        <span class="contributor-name">{{ user.display_name }}</span>
+                                        <span class="contributor-role role-{{ user.role }}">{{ user.get_role_display }}</span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted fst-italic">La wiki aún no tiene miembros registrados.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
-    {% if not request.user.is_authenticated %}
-    <div class="text-center mt-5">
-        <div class="join-cta">
-            <h3 class="join-cta-title">¿Listo para unirte al Estudio?</h3>
-            <p class="join-cta-desc">Regístrate y comienza a contribuir a la mayor wiki de Bendy en español.</p>
-            <a href="{{ url('auth:register') }}" class="bendy-btn bendy-btn-primary bendy-btn-lg">
-                <i class="fas fa-feather-alt me-2"></i> Unirse ahora
-            </a>
-        </div>
-    </div>
-    {% endif %}
-</section>
+        {% if not request.user.is_authenticated %}
+            <div class="text-center mt-5">
+                <div class="join-cta">
+                    <h3 class="join-cta-title">¿Listo para unirte al Estudio?</h3>
+                    <p class="join-cta-desc">Regístrate y comienza a contribuir a la mayor wiki de Bendy en español.</p>
+                    <a href="{% url 'auth:register' %}" class="bendy-btn bendy-btn-primary bendy-btn-lg">
+                        <i class="fas fa-feather-alt me-2"></i> Unirse ahora
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </section>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ static('js/bendy-home.js') }}"></script>
+    <script src="{% static 'js/bendy-home.js' %}"></script>
 {% endblock %}

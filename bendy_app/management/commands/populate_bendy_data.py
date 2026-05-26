@@ -10,7 +10,6 @@ Uso:
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
-
 # ── Datos de los juegos ───────────────────────────────────────────────────────
 
 GAMES_DATA: list[dict] = [
@@ -37,7 +36,6 @@ GAMES_DATA: list[dict] = [
         ),
     },
 ]
-
 
 # ── Datos de los personajes ───────────────────────────────────────────────────
 # Campos de FK / M2M:
@@ -406,7 +404,6 @@ CHARACTERS_DATA: list[dict] = [
         "is_playable": False,
     },
 ]
-
 
 # ── Datos de los capítulos ────────────────────────────────────────────────────
 # El campo `game` ahora es la clave del modelo Game (str: "batim" | "batdr")
@@ -851,7 +848,8 @@ class Command(BaseCommand):
         from bendy_app.models import Character, Chapter, Game
 
         if options["clear"]:
-            self.stdout.write(self.style.WARNING("Eliminando datos existentes..."))
+            self.stdout.write(
+                self.style.WARNING("Eliminando datos existentes..."))
             Character.objects.all().delete()
             Chapter.objects.all().delete()
             Game.objects.all().delete()
@@ -870,7 +868,8 @@ class Command(BaseCommand):
             status = "creado" if created else "actualizado"
             self.stdout.write(f"  [{status}] {game.title}")
 
-        self.stdout.write(self.style.SUCCESS(f"Juegos: {len(game_cache)} procesados."))
+        self.stdout.write(
+            self.style.SUCCESS(f"Juegos: {len(game_cache)} procesados."))
 
         # ── 2. Personajes ──────────────────────────────────────────────────────
         self.stdout.write("Insertando personajes...")
@@ -891,7 +890,8 @@ class Command(BaseCommand):
 
             # Asignar juegos extra (M2M)
             if extra_game_keys:
-                extra_games = [game_cache[k] for k in extra_game_keys if k in game_cache]
+                extra_games = [game_cache[k] for k in extra_game_keys if
+                               k in game_cache]
                 character.extra_games.set(extra_games)
             else:
                 character.extra_games.clear()
@@ -915,7 +915,8 @@ class Command(BaseCommand):
         for data in CHAPTERS_DATA:
             game_key: str = data.pop("game_key")
             game: Game = game_cache[game_key]
-            slug: str = slugify(f"{game_key}-chapter-{data['number']}-{data['title']}")
+            slug: str = slugify(
+                f"{game_key}-chapter-{data['number']}-{data['title']}")
 
             chapter, created = Chapter.objects.update_or_create(
                 game=game,
@@ -934,4 +935,5 @@ class Command(BaseCommand):
             )
         )
 
-        self.stdout.write(self.style.SUCCESS("\n✓ Base de datos poblada correctamente."))
+        self.stdout.write(
+            self.style.SUCCESS("\n✓ Base de datos poblada correctamente."))

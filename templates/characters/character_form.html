@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Editar {{ object.name }}{% else %}Nuevo Personaje{% endif %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-characters.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block container_class %}container py-4{% endblock %}
+
+{% block content %}
+    <div class="bendy-panel" style="max-width:900px;margin:0 auto">
+        <div class="bendy-panel-header">
+            <h2 class="bendy-panel-title">
+                {% if object %}
+                    <i class="fas fa-edit me-2"></i>Editar: {{ object.name }}
+                {% else %}
+                    <i class="fas fa-plus-circle me-2"></i>Nuevo Personaje
+                {% endif %}
+            </h2>
+            <a href="{% url 'bendy:character_list' %}" class="bendy-btn bendy-btn-outline-sm">
+                <i class="fas fa-arrow-left me-1"></i>Volver
+            </a>
+        </div>
+
+        <div class="bendy-panel-body">
+            <form method="post" enctype="multipart/form-data" class="bendy-form" id="characterForm" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="bendy-form-errors mb-3">
+                        {% for error in form.non_field_errors %}
+                            <p class="bendy-non-field-error">
+                                <i class="fas fa-times-circle me-2"></i>{{ error }}
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- SECCIÓN: Identificación -->
+                <div class="char-form-section">
+                    <h3 class="char-form-section-title">
+                        <i class="fas fa-id-card me-2"></i>Identificación
+                    </h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.name.id_for_label }}">
+                                    <i class="fas fa-signature me-1"></i>{{ form.name.label }} <span
+                                        class="text-danger">*</span>
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="bendy-field-error">{% for e in form.name.errors %}
+                                        <span>{{ e }}</span>{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.alias.id_for_label }}">
+                                    <i class="fas fa-quote-left me-1"></i>{{ form.alias.label }}
+                                </label>
+                                {{ form.alias }}
+                                {% if form.alias.errors %}
+                                    <div class="bendy-field-error">{% for e in form.alias.errors %}
+                                        <span>{{ e }}</span>{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.primary_game.id_for_label }}">
+                                    <i class="fas fa-gamepad me-1"></i>{{ form.primary_game.label }} <span
+                                        class="text-danger">*</span>
+                                </label>
+                                {{ form.primary_game }}
+                                {% if form.primary_game.errors %}
+                                    <div class="bendy-field-error">{% for e in form.primary_game.errors %}
+                                        <span>{{ e }}</span>{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.role.id_for_label }}">
+                                    <i class="fas fa-mask me-1"></i>{{ form.role.label }} <span
+                                        class="text-danger">*</span>
+                                </label>
+                                {{ form.role }}
+                                {% if form.role.errors %}
+                                    <div class="bendy-field-error">{% for e in form.role.errors %}
+                                        <span>{{ e }}</span>{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.character_type.id_for_label }}">
+                                    <i class="fas fa-dna me-1"></i>{{ form.character_type.label }} <span
+                                        class="text-danger">*</span>
+                                </label>
+                                {{ form.character_type }}
+                                {% if form.character_type.errors %}
+                                    <div class="bendy-field-error">{% for e in form.character_type.errors %}
+                                        <span>{{ e }}</span>{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN: Imagen -->
+                <div class="char-form-section">
+                    <h3 class="char-form-section-title">
+                        <i class="fas fa-image me-2"></i>Imagen
+                    </h3>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.image.id_for_label }}">
+                                    {{ form.image.label }}
+                                </label>
+                                {{ form.image }}
+                                {% if object.image %}
+                                    <div class="mt-2 d-flex align-items-center gap-3">
+                                        <img src="{{ object.image.url }}" alt="{{ object.name }}"
+                                             style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid var(--ink-gold)">
+                                        <small class="text-muted">Imagen actual — sube una nueva para
+                                            reemplazarla</small>
+                                    </div>
+                                {% endif %}
+                                {% if form.image.errors %}
+                                    <div class="bendy-field-error">{% for e in form.image.errors %}
+                                        <span>{{ e }}</span>{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN: Descripción -->
+                <div class="char-form-section">
+                    <h3 class="char-form-section-title">
+                        <i class="fas fa-scroll me-2"></i>Descripción y trasfondo
+                    </h3>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.description.id_for_label }}">
+                                    <i class="fas fa-align-left me-1"></i>{{ form.description.label }}
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="bendy-field-error">{% for e in form.description.errors %}
+                                        <span>{{ e }}</span>{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.appearance.id_for_label }}">
+                                    <i class="fas fa-eye me-1"></i>{{ form.appearance.label }}
+                                </label>
+                                {{ form.appearance }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.personality.id_for_label }}">
+                                    <i class="fas fa-brain me-1"></i>{{ form.personality.label }}
+                                </label>
+                                {{ form.personality }}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.background.id_for_label }}">
+                                    <i class="fas fa-history me-1"></i>{{ form.background.label }}
+                                </label>
+                                {{ form.background }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN: Datos adicionales -->
+                <div class="char-form-section">
+                    <h3 class="char-form-section-title">
+                        <i class="fas fa-info-circle me-2"></i>Datos adicionales
+                    </h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.human_counterpart.id_for_label }}">
+                                    <i class="fas fa-user me-1"></i>{{ form.human_counterpart.label }}
+                                </label>
+                                {{ form.human_counterpart }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.real_world_inspiration.id_for_label }}">
+                                    <i class="fas fa-lightbulb me-1"></i>{{ form.real_world_inspiration.label }}
+                                </label>
+                                {{ form.real_world_inspiration }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.voice_actor_batim.id_for_label }}">
+                                    <i class="fas fa-microphone me-1"></i>{{ form.voice_actor_batim.label }}
+                                </label>
+                                {{ form.voice_actor_batim }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.voice_actor_batdr.id_for_label }}">
+                                    <i class="fas fa-microphone me-1"></i>{{ form.voice_actor_batdr.label }}
+                                </label>
+                                {{ form.voice_actor_batdr }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.appears_in_chapters.id_for_label }}">
+                                    <i class="fas fa-book-open me-1"></i>{{ form.appears_in_chapters.label }}
+                                </label>
+                                {{ form.appears_in_chapters }}
+                                <div class="bendy-field-hint">Ej: 1, 2, 3 o Acto 1</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.is_alive_end.id_for_label }}">
+                                    <i class="fas fa-heartbeat me-1"></i>{{ form.is_alive_end.label }}
+                                </label>
+                                {{ form.is_alive_end }}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap gap-4 mt-1">
+                                <div class="bendy-check-group">
+                                    {{ form.is_playable }}
+                                    <label for="{{ form.is_playable.id_for_label }}" class="bendy-check-label">
+                                        <i class="fas fa-gamepad me-1 text-warning"></i>{{ form.is_playable.label }}
+                                    </label>
+                                </div>
+                                <div class="bendy-check-group">
+                                    {{ form.is_ink_creature }}
+                                    <label for="{{ form.is_ink_creature.id_for_label }}" class="bendy-check-label">
+                                        <i class="fas fa-tint me-1"
+                                           style="color:#1a1a2e"></i>{{ form.is_ink_creature.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN: Cita icónica -->
+                <div class="char-form-section">
+                    <h3 class="char-form-section-title">
+                        <i class="fas fa-quote-left me-2"></i>Cita icónica
+                    </h3>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.iconic_quote.id_for_label }}">
+                                    {{ form.iconic_quote.label }}
+                                </label>
+                                {{ form.iconic_quote }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label" for="{{ form.quote_source.id_for_label }}">
+                                    {{ form.quote_source.label }}
+                                </label>
+                                {{ form.quote_source }}
+                                <div class="bendy-field-hint">Ej: Capítulo 1, BATIM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="d-flex gap-3 mt-4 pt-3" style="border-top:1px solid var(--ink-border)">
+                    <button type="submit" class="bendy-btn bendy-btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        {% if object %}Guardar cambios{% else %}Crear personaje{% endif %}
+                    </button>
+                    {% if object %}
+                        <a href="{% url 'bendy:character_detail' object.slug %}" class="bendy-btn bendy-btn-ghost">
+                            Cancelar
+                        </a>
+                    {% else %}
+                        <a href="{% url 'bendy:character_list' %}" class="bendy-btn bendy-btn-ghost">
+                            Cancelar
+                        </a>
+                    {% endif %}
+                    {% if object and request.user.is_staff %}
+                        <a href="{% url 'bendy:character_delete' object.slug %}"
+                           class="bendy-btn bendy-btn-danger ms-auto">
+                            <i class="fas fa-trash-alt me-2"></i>Eliminar
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/bendy-characters.js' %}"></script>
+{% endblock %}

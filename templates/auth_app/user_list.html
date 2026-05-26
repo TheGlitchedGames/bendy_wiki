@@ -1,100 +1,103 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Comunidad{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ static('css/profile.css') }}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="community-page">
-    <div class="page-header-bendy">
-        <div class="page-header-bg"></div>
-        <div class="page-header-content">
-            <div class="page-eyebrow">El Estudio de Tinta</div>
-            <h1 class="page-title">Comunidad</h1>
-            <p class="page-desc">Los archivadores que mantienen viva la wiki. <strong>{{ total_users }}</strong> miembros registrados.</p>
-        </div>
-    </div>
-
-    <div class="mt-4">
-        {% if users %}
-        <div class="row g-3" id="userGrid">
-            {% for user in users %}
-            <div class="col-sm-6 col-md-4 col-lg-3">
-                <a href="{{ url('auth:profile', args=[request.user.username]) }}" class="user-card-link">
-                    <div class="user-card" data-role="{{ user.role }}">
-                        <div class="user-card-avatar">
-                            {% if user.avatar %}
-                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
-                            {% else %}
-                                <div class="user-card-avatar-placeholder">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="user-card-info">
-                            <div class="user-card-name">{{ user.display_name }}</div>
-                            <div class="user-card-handle">@{{ user.username }}</div>
-                            <div class="user-card-role role-{{ user.role }}">{{ user.get_role_display() }}</div>
-                            <div class="user-card-points">
-                                <i class="fas fa-star me-1"></i>{{ user.ink_points }} pts
-                            </div>
-                        </div>
-                        <div class="user-card-game-badge" title="{{ user.get_favorite_game_display() }}">
-                            {% if user.favorite_game == 'batim' %}🎬
-                            {% elif user.favorite_game == 'batdr' %}🌑
-                            {% else %}✦{% endif %}
-                        </div>
-                    </div>
-                </a>
+    <div class="community-page">
+        <div class="page-header-bendy">
+            <div class="page-header-bg"></div>
+            <div class="page-header-content">
+                <div class="page-eyebrow">El Estudio de Tinta</div>
+                <h1 class="page-title">Comunidad</h1>
+                <p class="page-desc">Los archivadores que mantienen viva la wiki. <strong>{{ total_users }}</strong>
+                    miembros registrados.</p>
             </div>
-            {% endfor %}
         </div>
 
-        <!-- Paginación -->
-        {% if is_paginated %}
-        <nav class="bendy-pagination mt-5" aria-label="Páginas">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous() %}
-                <li class="page-item">
-                    <a class="page-link bendy-page-link" href="?page={{ page_obj.previous_page_number() }}">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                </li>
-                {% endif %}
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link bendy-page-link">{{ num }}</span>
-                    </li>
-                    {% elif num > page_obj.number - 3 and num < page_obj.number + 3 %}
-                    <li class="page-item">
-                        <a class="page-link bendy-page-link" href="?page={{ num }}">{{ num }}</a>
-                    </li>
-                    {% endif %}
-                {% endfor %}
-                {% if page_obj.has_next() %}
-                <li class="page-item">
-                    <a class="page-link bendy-page-link" href="?page={{ page_obj.next_page_number() }}">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
+        <div class="mt-4">
+            {% if users %}
+                <div class="row g-3" id="userGrid">
+                    {% for user in users %}
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <a href="{% url 'auth:profile' user.username %}" class="user-card-link">
+                                <div class="user-card" data-role="{{ user.role }}">
+                                    <div class="user-card-avatar">
+                                        {% if user.avatar %}
+                                            <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
+                                        {% else %}
+                                            <div class="user-card-avatar-placeholder">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="user-card-info">
+                                        <div class="user-card-name">{{ user.display_name }}</div>
+                                        <div class="user-card-handle">@{{ user.username }}</div>
+                                        <div class="user-card-role role-{{ user.role }}">{{ user.get_role_display }}</div>
+                                        <div class="user-card-points">
+                                            <i class="fas fa-star me-1"></i>{{ user.ink_points }} pts
+                                        </div>
+                                    </div>
+                                    <div class="user-card-game-badge" title="{{ user.get_favorite_game_display }}">
+                                        {% if user.favorite_game == 'batim' %}🎬
+                                        {% elif user.favorite_game == 'batdr' %}🌑
+                                        {% else %}✦{% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
 
-        {% else %}
-        <div class="empty-state text-center py-5">
-            <div class="empty-state-icon"><i class="fas fa-users"></i></div>
-            <h3>Aún no hay miembros</h3>
-            <p class="text-muted">¡Sé el primero en unirte a la wiki!</p>
-            <a href="{{ url('auth:register') }}" class="bendy-btn bendy-btn-primary mt-3">
-                <i class="fas fa-feather-alt me-2"></i>Registrarse
-            </a>
+                <!-- Paginación -->
+                {% if is_paginated %}
+                    <nav class="bendy-pagination mt-5" aria-label="Páginas">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link bendy-page-link"
+                                       href="?page={{ page_obj.previous_page_number }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link bendy-page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link bendy-page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link bendy-page-link" href="?page={{ page_obj.next_page_number }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="empty-state text-center py-5">
+                    <div class="empty-state-icon"><i class="fas fa-users"></i></div>
+                    <h3>Aún no hay miembros</h3>
+                    <p class="text-muted">¡Sé el primero en unirte a la wiki!</p>
+                    <a href="{% url 'auth:register' %}" class="bendy-btn bendy-btn-primary mt-3">
+                        <i class="fas fa-feather-alt me-2"></i>Registrarse
+                    </a>
+                </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
-</div>
 {% endblock %}

@@ -1,50 +1,51 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Eliminar Cuenta{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ static('css/auth.css') }}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:520px">
-    <div class="bendy-panel bendy-panel-danger">
-        <div class="bendy-panel-header danger-header">
-            <h2 class="bendy-panel-title">
-                <i class="fas fa-skull-crossbones me-2"></i>Eliminar Cuenta
-            </h2>
-        </div>
-        <div class="bendy-panel-body">
-            <div class="danger-warning-box">
-                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                <h4>Esta acción es irreversible</h4>
-                <p>Al eliminar tu cuenta perderás permanentemente:</p>
-                <ul class="danger-list">
-                    <li><i class="fas fa-times me-2"></i>Tu perfil y datos personales</li>
-                    <li><i class="fas fa-times me-2"></i>Todos tus puntos de tinta</li>
-                    <li><i class="fas fa-times me-2"></i>Tu historial de contribuciones</li>
-                    <li><i class="fas fa-times me-2"></i>Tu acceso al estudio para siempre</li>
-                </ul>
+    <div class="container py-4" style="max-width:520px">
+        <div class="bendy-panel bendy-panel-danger">
+            <div class="bendy-panel-header danger-header">
+                <h2 class="bendy-panel-title">
+                    <i class="fas fa-skull-crossbones me-2"></i>Eliminar Cuenta
+                </h2>
             </div>
-            <form method="post" class="bendy-form mt-4" id="deleteAccountForm">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                <div class="form-group-bendy">
-                    <label class="bendy-label">
-                        Escribe tu nombre de usuario <strong>{{ request.user.username }}</strong> para confirmar:
-                    </label>
-                    <input type="text" name="confirm_username" class="bendy-input"
-                           placeholder="{{ request.user.username }}" autocomplete="off" required>
+            <div class="bendy-panel-body">
+                <div class="danger-warning-box">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <h4>Esta acción es irreversible</h4>
+                    <p>Al eliminar tu cuenta perderás permanentemente:</p>
+                    <ul class="danger-list">
+                        <li><i class="fas fa-times me-2"></i>Tu perfil y datos personales</li>
+                        <li><i class="fas fa-times me-2"></i>Todos tus puntos de tinta</li>
+                        <li><i class="fas fa-times me-2"></i>Tu historial de contribuciones</li>
+                        <li><i class="fas fa-times me-2"></i>Tu acceso al estudio para siempre</li>
+                    </ul>
                 </div>
-                <div class="d-flex gap-3 mt-4">
-                    <button type="submit" class="bendy-btn bendy-btn-danger">
-                        <i class="fas fa-trash-alt me-2"></i>Eliminar mi cuenta
-                    </button>
-                    <a href="{{ url('auth:profile', args=[request.user.username]) }}" class="bendy-btn bendy-btn-ghost">
-                        Cancelar
-                    </a>
-                </div>
-            </form>
+                <form method="post" class="bendy-form mt-4" id="deleteAccountForm">
+                    {% csrf_token %}
+                    <div class="form-group-bendy">
+                        <label class="bendy-label">
+                            Escribe tu nombre de usuario <strong>{{ request.user.username }}</strong> para confirmar:
+                        </label>
+                        <input type="text" name="confirm_username" class="bendy-input"
+                               placeholder="{{ request.user.username }}" autocomplete="off" required>
+                    </div>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="bendy-btn bendy-btn-danger">
+                            <i class="fas fa-trash-alt me-2"></i>Eliminar mi cuenta
+                        </button>
+                        <a href="{% url 'auth:profile' request.user.username %}" class="bendy-btn bendy-btn-ghost">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

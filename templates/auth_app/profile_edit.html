@@ -1,83 +1,91 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Editar Perfil{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ static('css/auth.css') }}">
-<link rel="stylesheet" href="{{ static('css/profile.css') }}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:760px">
-    <div class="bendy-panel">
-        <div class="bendy-panel-header">
-            <h2 class="bendy-panel-title">
-                <i class="fas fa-edit me-2"></i>Editar Perfil
-            </h2>
-            <a href="{{ url('auth:profile', args=[request.user.username]) }}" class="bendy-btn bendy-btn-outline-sm">
-                <i class="fas fa-arrow-left me-1"></i>Volver
-            </a>
-        </div>
-        <div class="bendy-panel-body">
-            <form method="post" enctype="multipart/form-data" class="bendy-form" id="profileEditForm" novalidate>
-                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="form-group-bendy">
-                            <label class="bendy-label"><i class="fas fa-user me-2"></i>{{ form.first_name.label }}</label>
-                            {{ form.first_name }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group-bendy">
-                            <label class="bendy-label"><i class="fas fa-user me-2"></i>{{ form.last_name.label }}</label>
-                            {{ form.last_name }}
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group-bendy">
-                            <label class="bendy-label"><i class="fas fa-envelope me-2"></i>{{ form.email.label }}</label>
-                            {{ form.email }}
-                            {% if form.email.errors %}
-                            <div class="bendy-field-error">{% for e in form.email.errors %}<span>{{ e }}</span>{% endfor %}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group-bendy">
-                            <label class="bendy-label"><i class="fas fa-pen me-2"></i>{{ form.bio.label }}</label>
-                            {{ form.bio }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group-bendy">
-                            <label class="bendy-label"><i class="fas fa-gamepad me-2"></i>{{ form.favorite_game.label }}</label>
-                            {{ form.favorite_game }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group-bendy">
-                            <label class="bendy-label"><i class="fas fa-image me-2"></i>{{ form.avatar.label }}</label>
-                            {{ form.avatar }}
-                            {% if request.user.avatar %}
-                            <div class="current-avatar-preview mt-2">
-                                <img src="{{ request.user.avatar.url }}" alt="Avatar actual" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--ink-gold)">
-                                <small class="ms-2 text-muted">Avatar actual</small>
+    <div class="container py-4" style="max-width:760px">
+        <div class="bendy-panel">
+            <div class="bendy-panel-header">
+                <h2 class="bendy-panel-title">
+                    <i class="fas fa-edit me-2"></i>Editar Perfil
+                </h2>
+                <a href="{% url 'auth:profile' request.user.username %}" class="bendy-btn bendy-btn-outline-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+            <div class="bendy-panel-body">
+                <form method="post" enctype="multipart/form-data" class="bendy-form" id="profileEditForm" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label"><i class="fas fa-user me-2"></i>{{ form.first_name.label }}
+                                </label>
+                                {{ form.first_name }}
                             </div>
-                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label"><i class="fas fa-user me-2"></i>{{ form.last_name.label }}
+                                </label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label"><i class="fas fa-envelope me-2"></i>{{ form.email.label }}
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="bendy-field-error">{% for e in form.email.errors %}
+                                        <span>{{ e }}</span>{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label"><i class="fas fa-pen me-2"></i>{{ form.bio.label }}</label>
+                                {{ form.bio }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label"><i
+                                        class="fas fa-gamepad me-2"></i>{{ form.favorite_game.label }}</label>
+                                {{ form.favorite_game }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-bendy">
+                                <label class="bendy-label"><i class="fas fa-image me-2"></i>{{ form.avatar.label }}
+                                </label>
+                                {{ form.avatar }}
+                                {% if request.user.avatar %}
+                                    <div class="current-avatar-preview mt-2">
+                                        <img src="{{ request.user.avatar.url }}" alt="Avatar actual"
+                                             style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--ink-gold)">
+                                        <small class="ms-2 text-muted">Avatar actual</small>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="d-flex gap-3 mt-4">
-                    <button type="submit" class="bendy-btn bendy-btn-primary">
-                        <i class="fas fa-save me-2"></i>Guardar cambios
-                    </button>
-                    <a href="{{ url('auth:profile', args=[request.user.username]) }}" class="bendy-btn bendy-btn-ghost">
-                        Cancelar
-                    </a>
-                </div>
-            </form>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="bendy-btn bendy-btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar cambios
+                        </button>
+                        <a href="{% url 'auth:profile' request.user.username %}" class="bendy-btn bendy-btn-ghost">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

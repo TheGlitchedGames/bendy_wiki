@@ -1,157 +1,162 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Iniciar Sesión{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ static('css/auth.css') }}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="auth-page">
-    <div class="auth-container" id="authContainer">
+    <div class="auth-page">
+        <div class="auth-container" id="authContainer">
 
-        <!-- Decoración lateral izquierda -->
-        <div class="auth-deco auth-deco-left">
-            <div class="deco-ink-drop" style="top:10%;animation-delay:0s"></div>
-            <div class="deco-ink-drop" style="top:35%;animation-delay:0.4s"></div>
-            <div class="deco-ink-drop" style="top:65%;animation-delay:0.8s"></div>
-            <div class="deco-ink-drop" style="top:85%;animation-delay:1.2s"></div>
-            <div class="deco-vertical-line"></div>
-        </div>
-
-        <!-- PANEL IZQUIERDO: branding -->
-        <div class="auth-branding">
-            <div class="auth-brand-ink-bg" id="authInkBg"></div>
-            <div class="auth-brand-content">
-                <div class="auth-brand-symbol">✦</div>
-                <h2 class="auth-brand-title">El Estudio<br>de Tinta</h2>
-                <p class="auth-brand-quote">
-                    <em>"Bendy is always watching..."</em>
-                </p>
-                <div class="auth-brand-divider"></div>
-                <p class="auth-brand-desc">
-                    Accede a tu cuenta y contribuye a la mayor wiki de Bendy en español.
-                    Miles de artículos, personajes y secretos te esperan.
-                </p>
-                <div class="auth-brand-stats">
-                    <div class="auth-stat">
-                        <span class="auth-stat-number" data-target="2">0</span>
-                        <span class="auth-stat-label">Juegos</span>
-                    </div>
-                    <div class="auth-stat">
-                        <span class="auth-stat-number" data-target="50">0</span>
-                        <span class="auth-stat-label">Artículos</span>
-                    </div>
-                    <div class="auth-stat">
-                        <span class="auth-stat-number" data-target="35">0</span>
-                        <span class="auth-stat-label">Personajes</span>
-                    </div>
-                </div>
+            <!-- Decoración lateral izquierda -->
+            <div class="auth-deco auth-deco-left">
+                <div class="deco-ink-drop" style="top:10%;animation-delay:0s"></div>
+                <div class="deco-ink-drop" style="top:35%;animation-delay:0.4s"></div>
+                <div class="deco-ink-drop" style="top:65%;animation-delay:0.8s"></div>
+                <div class="deco-ink-drop" style="top:85%;animation-delay:1.2s"></div>
+                <div class="deco-vertical-line"></div>
             </div>
-        </div>
 
-        <!-- PANEL DERECHO: formulario -->
-        <div class="auth-form-panel">
-            <div class="auth-form-inner">
-
-                <div class="auth-form-header">
-                    <div class="auth-form-icon">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </div>
-                    <h1 class="auth-form-title">Iniciar Sesión</h1>
-                    <p class="auth-form-subtitle">¿Nuevo en el estudio?
-                        <a href="{{ url('auth:register') }}" class="auth-link">Regístrate aquí</a>
+            <!-- PANEL IZQUIERDO: branding -->
+            <div class="auth-branding">
+                <div class="auth-brand-ink-bg" id="authInkBg"></div>
+                <div class="auth-brand-content">
+                    <div class="auth-brand-symbol">✦</div>
+                    <h2 class="auth-brand-title">El Estudio<br>de Tinta</h2>
+                    <p class="auth-brand-quote">
+                        <em>"Bendy is always watching..."</em>
                     </p>
-                </div>
-
-                <form method="post" action="{{ url('auth:login') }}" class="bendy-form" id="loginForm" novalidate>
-                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-
-                    <div class="form-group-bendy" id="fg-username">
-                        <label for="id_username" class="bendy-label">
-                            <i class="fas fa-user me-2"></i>{{ form.username.label }}
-                        </label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="bendy-field-error">
-                                {% for error in form.username.errors %}
-                                    <span><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group-bendy" id="fg-password">
-                        <label for="id_password" class="bendy-label">
-                            <i class="fas fa-lock me-2"></i>{{ form.password.label }}
-                        </label>
-                        <div class="input-password-wrapper">
-                            {{ form.password }}
-                            <button type="button" class="toggle-password" data-target="id_password" aria-label="Mostrar contraseña">
-                                <i class="fas fa-eye"></i>
-                            </button>
+                    <div class="auth-brand-divider"></div>
+                    <p class="auth-brand-desc">
+                        Accede a tu cuenta y contribuye a la mayor wiki de Bendy en español.
+                        Miles de artículos, personajes y secretos te esperan.
+                    </p>
+                    <div class="auth-brand-stats">
+                        <div class="auth-stat">
+                            <span class="auth-stat-number" data-target="2">0</span>
+                            <span class="auth-stat-label">Juegos</span>
                         </div>
-                        {% if form.password.errors %}
-                            <div class="bendy-field-error">
-                                {% for error in form.password.errors %}
-                                    <span><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    {% if form.non_field_errors() %}
-                    <div class="bendy-form-errors">
-                        {% for error in form.non_field_errors() %}
-                            <p class="bendy-non-field-error">
-                                <i class="fas fa-times-circle me-2"></i>{{ error }}
-                            </p>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-
-                    <div class="form-extras d-flex justify-content-between align-items-center">
-                        <div class="bendy-check-group">
-                            {{ form.remember_me }}
-                            <label for="id_remember_me" class="bendy-check-label">{{ form.remember_me.label }}</label>
+                        <div class="auth-stat">
+                            <span class="auth-stat-number" data-target="50">0</span>
+                            <span class="auth-stat-label">Artículos</span>
                         </div>
-                        <a href="#" class="auth-link auth-link-sm">¿Olvidaste tu contraseña?</a>
+                        <div class="auth-stat">
+                            <span class="auth-stat-number" data-target="35">0</span>
+                            <span class="auth-stat-label">Personajes</span>
+                        </div>
                     </div>
-
-                    <button type="submit" class="bendy-btn bendy-btn-primary bendy-btn-full bendy-btn-lg mt-4" id="loginBtn">
-                        <span class="btn-text"><i class="fas fa-door-open me-2"></i>Entrar al Estudio</span>
-                        <span class="btn-loading d-none"><i class="fas fa-spinner fa-spin me-2"></i>Verificando...</span>
-                    </button>
-                </form>
-
-                <div class="auth-separator">
-                    <span>o continúa con</span>
                 </div>
-
-                <div class="auth-social">
-                    <a href="#" class="bendy-btn bendy-btn-social" title="Próximamente">
-                        <i class="fab fa-google me-2"></i> Google
-                    </a>
-                    <a href="#" class="bendy-btn bendy-btn-social" title="Próximamente">
-                        <i class="fab fa-discord me-2"></i> Discord
-                    </a>
-                </div>
-
             </div>
-        </div>
 
-        <!-- Decoración lateral derecha -->
-        <div class="auth-deco auth-deco-right">
-            <div class="deco-ink-drop" style="top:20%;animation-delay:0.2s"></div>
-            <div class="deco-ink-drop" style="top:50%;animation-delay:0.6s"></div>
-            <div class="deco-ink-drop" style="top:75%;animation-delay:1.0s"></div>
-            <div class="deco-vertical-line"></div>
-        </div>
+            <!-- PANEL DERECHO: formulario -->
+            <div class="auth-form-panel">
+                <div class="auth-form-inner">
 
+                    <div class="auth-form-header">
+                        <div class="auth-form-icon">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <h1 class="auth-form-title">Iniciar Sesión</h1>
+                        <p class="auth-form-subtitle">¿Nuevo en el estudio?
+                            <a href="{% url 'auth:register' %}" class="auth-link">Regístrate aquí</a>
+                        </p>
+                    </div>
+
+                    <form method="post" action="{% url 'auth:login' %}" class="bendy-form" id="loginForm" novalidate>
+                        {% csrf_token %}
+
+                        <div class="form-group-bendy" id="fg-username">
+                            <label for="id_username" class="bendy-label">
+                                <i class="fas fa-user me-2"></i>{{ form.username.label }}
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="bendy-field-error">
+                                    {% for error in form.username.errors %}
+                                        <span><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group-bendy" id="fg-password">
+                            <label for="id_password" class="bendy-label">
+                                <i class="fas fa-lock me-2"></i>{{ form.password.label }}
+                            </label>
+                            <div class="input-password-wrapper">
+                                {{ form.password }}
+                                <button type="button" class="toggle-password" data-target="id_password"
+                                        aria-label="Mostrar contraseña">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="bendy-field-error">
+                                    {% for error in form.password.errors %}
+                                        <span><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="bendy-form-errors">
+                                {% for error in form.non_field_errors %}
+                                    <p class="bendy-non-field-error">
+                                        <i class="fas fa-times-circle me-2"></i>{{ error }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-extras d-flex justify-content-between align-items-center">
+                            <div class="bendy-check-group">
+                                {{ form.remember_me }}
+                                <label for="id_remember_me"
+                                       class="bendy-check-label">{{ form.remember_me.label }}</label>
+                            </div>
+                            <a href="#" class="auth-link auth-link-sm">¿Olvidaste tu contraseña?</a>
+                        </div>
+
+                        <button type="submit" class="bendy-btn bendy-btn-primary bendy-btn-full bendy-btn-lg mt-4"
+                                id="loginBtn">
+                            <span class="btn-text"><i class="fas fa-door-open me-2"></i>Entrar al Estudio</span>
+                            <span class="btn-loading d-none"><i
+                                    class="fas fa-spinner fa-spin me-2"></i>Verificando...</span>
+                        </button>
+                    </form>
+
+                    <div class="auth-separator">
+                        <span>o continúa con</span>
+                    </div>
+
+                    <div class="auth-social">
+                        <a href="#" class="bendy-btn bendy-btn-social" title="Próximamente">
+                            <i class="fab fa-google me-2"></i> Google
+                        </a>
+                        <a href="#" class="bendy-btn bendy-btn-social" title="Próximamente">
+                            <i class="fab fa-discord me-2"></i> Discord
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Decoración lateral derecha -->
+            <div class="auth-deco auth-deco-right">
+                <div class="deco-ink-drop" style="top:20%;animation-delay:0.2s"></div>
+                <div class="deco-ink-drop" style="top:50%;animation-delay:0.6s"></div>
+                <div class="deco-ink-drop" style="top:75%;animation-delay:1.0s"></div>
+                <div class="deco-vertical-line"></div>
+            </div>
+
+        </div>
     </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ static('js/auth.js') }}"></script>
+    <script src="{% static 'js/auth.js' %}"></script>
 {% endblock %}

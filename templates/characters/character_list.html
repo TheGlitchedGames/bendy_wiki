@@ -62,6 +62,7 @@
                     >
                     {% if request.GET.name %}
                         <a href="?
+
                                 {% for k,v in request.GET.items %}{% if k != 'name' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
                            class="char-search-clear" title="Limpiar">
                             <i class="fas fa-times"></i>
@@ -102,6 +103,7 @@
           <span class="char-active-pill-label">{{ f.label }}:</span>
           <span class="char-active-pill-value">{{ f.value }}</span>
           <a href="?
+
                   {% for k,v in request.GET.items %}{% if k != f.key and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
              class="char-active-pill-remove" title="Quitar filtro">
             <i class="fas fa-times"></i>
@@ -182,6 +184,7 @@
                             <li class="page-item">
                                 <a class="page-link bendy-page-link"
                                    href="?
+
                                            {% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
                                     <i class="fas fa-chevron-left"></i>
                                 </a>
@@ -197,6 +200,7 @@
                                 <li class="page-item">
                                     <a class="page-link bendy-page-link"
                                        href="?
+
                                                {% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">
                                         {{ num }}
                                     </a>
@@ -208,6 +212,7 @@
                             <li class="page-item">
                                 <a class="page-link bendy-page-link"
                                    href="?
+
                                            {% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
                                     <i class="fas fa-chevron-right"></i>
                                 </a>

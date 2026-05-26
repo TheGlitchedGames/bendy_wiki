@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Eliminar {{ character.name }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-characters.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container py-4" style="max-width:540px">
+        <div class="bendy-panel bendy-panel-danger">
+            <div class="bendy-panel-header danger-header">
+                <h2 class="bendy-panel-title">
+                    <i class="fas fa-skull-crossbones me-2"></i>Eliminar Personaje
+                </h2>
+            </div>
+            <div class="bendy-panel-body">
+
+                <!-- Vista previa del personaje -->
+                <div class="d-flex align-items-center gap-3 mb-4 p-3"
+                     style="background:var(--ink-surface);border-radius:8px;border:1px solid var(--ink-border)">
+                    {% if character.image %}
+                        <img src="{{ character.image.url }}" alt="{{ character.name }}"
+                             style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:2px solid var(--ink-gold);flex-shrink:0">
+                    {% else %}
+                        <div style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;
+                                background:var(--ink-dark);border-radius:8px;border:2px solid var(--ink-border);flex-shrink:0">
+                            <i class="fas fa-user-secret fa-2x" style="color:var(--ink-muted)"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div style="font-family:var(--font-display);font-size:1.2rem;color:var(--ink-gold)">
+                            {{ character.name }}
+                        </div>
+                        {% if character.alias %}
+                            <div style="color:var(--ink-muted);font-size:.875rem;font-style:italic">
+                                {{ character.alias }}
+                            </div>
+                        {% endif %}
+                        <div class="mt-1">
+                        <span class="char-badge char-badge--game char-badge--{{ character.primary_game.key }}">
+                            {{ character.primary_game }}
+                        </span>
+                            <span class="char-badge char-badge--role char-badge--{{ character.role }} ms-1">
+                            {{ character.get_role_display }}
+                        </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="danger-warning-box">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <h4>Esta acción es irreversible</h4>
+                    <p class="mb-0">
+                        El personaje <strong>{{ character.name }}</strong> y toda su información
+                        serán eliminados permanentemente del archivo del Estudio de Tinta.
+                        No existe forma de recuperarlos.
+                    </p>
+                </div>
+
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="bendy-btn bendy-btn-danger">
+                            <i class="fas fa-trash-alt me-2"></i>Sí, eliminar definitivamente
+                        </button>
+                        <a href="{% url 'bendy:character_detail' character.slug %}" class="bendy-btn bendy-btn-ghost">
+                            <i class="fas fa-arrow-left me-2"></i>Cancelar
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
