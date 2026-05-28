@@ -241,3 +241,5 @@ cython_debug/
 #.idea/
 
 staticfiles/
+
+/.env
