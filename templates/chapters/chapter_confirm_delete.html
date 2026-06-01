@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Eliminar {{ object.full_title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-chapters.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="bendy-panel bendy-panel-danger">
+                <div class="bendy-panel-header danger-header">
+                    <h2 class="bendy-panel-title" style="color: #e87070;">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Eliminar capítulo
+                    </h2>
+                </div>
+                <div class="bendy-panel-body text-center">
+                    <div class="chap-delete-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h3 class="chap-delete-title">¿Eliminar «{{ object.full_title }}»?</h3>
+                    <p class="chap-delete-warning">
+                        Esta acción es <strong>irreversible</strong>.
+                        Se eliminará el capítulo permanentemente del archivo del Estudio.
+                    </p>
+
+                    <!-- Vista previa -->
+                    <div class="chap-delete-preview">
+                        <span class="chap-game-badge chap-game-badge--{{ object.game.key }} mb-2 d-inline-block">
+                            {{ object.game.key|upper }} · Capítulo {{ object.number }}
+                        </span>
+                        <p class="mb-1"><strong>{{ object.title }}</strong></p>
+                        <small class="text-muted">
+                            {{ object.get_difficulty_display }}
+                            {% if object.has_boss_fight %} · Boss Fight{% endif %}
+                        </small>
+                    </div>
+
+                    <form method="post" class="mt-4 d-flex gap-3 justify-content-center">
+                        {% csrf_token %}
+                        <a href="{% url 'bendy:chapter_detail' object.slug %}"
+                           class="bendy-btn bendy-btn-ghost">
+                            <i class="fas fa-arrow-left me-2"></i> Cancelar
+                        </a>
+                        <button type="submit" class="bendy-btn bendy-btn-danger">
+                            <i class="fas fa-trash me-2"></i> Sí, eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

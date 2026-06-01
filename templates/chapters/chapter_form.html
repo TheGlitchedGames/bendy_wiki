@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Editar {{ object.full_title }}{% else %}Nuevo Capítulo{% endif %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-chapters.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-9 col-lg-10">
+            <div class="bendy-panel">
+                <div class="bendy-panel-header">
+                    <h2 class="bendy-panel-title">
+                        <i class="fas fa-{% if object %}edit{% else %}plus{% endif %} me-2"></i>
+                        {% if object %}Editar «{{ object.full_title }}»{% else %}Añadir nuevo capítulo{% endif %}
+                    </h2>
+                </div>
+                <div class="bendy-panel-body">
+                    <form method="post" enctype="multipart/form-data" novalidate id="chapterForm">
+                        {% csrf_token %}
+
+                        <!-- Sección: Identificación -->
+                        <div class="chap-form-section">
+                            <h3 class="chap-form-section-title">
+                                <i class="fas fa-tag me-2"></i> Identificación
+                            </h3>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.game.id_for_label }}">
+                                            Juego <span class="bendy-required">*</span>
+                                        </label>
+                                        {{ form.game }}
+                                        {% if form.game.errors %}<div class="bendy-field-error">{{ form.game.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.number.id_for_label }}">
+                                            Número <span class="bendy-required">*</span>
+                                        </label>
+                                        {{ form.number }}
+                                        {% if form.number.errors %}<div class="bendy-field-error">{{ form.number.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.title.id_for_label }}">
+                                            Título <span class="bendy-required">*</span>
+                                        </label>
+                                        {{ form.title }}
+                                        {% if form.title.errors %}<div class="bendy-field-error">{{ form.title.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.slug.id_for_label }}">
+                                            Slug <span class="bendy-required">*</span>
+                                        </label>
+                                        {{ form.slug }}
+                                        {% if form.slug.errors %}<div class="bendy-field-error">{{ form.slug.errors.0 }}</div>{% endif %}
+                                        <small class="bendy-help">Identificador único para la URL</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Arte y Fechas -->
+                        <div class="chap-form-section">
+                            <h3 class="chap-form-section-title">
+                                <i class="fas fa-palette me-2"></i> Arte y Fechas
+                            </h3>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.art_theme.id_for_label }}">Tema artístico</label>
+                                        {{ form.art_theme }}
+                                        {% if form.art_theme.errors %}<div class="bendy-field-error">{{ form.art_theme.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.release_date.id_for_label }}">Fecha de lanzamiento</label>
+                                        {{ form.release_date }}
+                                        {% if form.release_date.errors %}<div class="bendy-field-error">{{ form.release_date.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.last_update_date.id_for_label }}">Última actualización</label>
+                                        {{ form.last_update_date }}
+                                        {% if form.last_update_date.errors %}<div class="bendy-field-error">{{ form.last_update_date.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-12" id="artThemeExplanationWrapper">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.art_theme_explanation.id_for_label }}">Explicación del tema artístico</label>
+                                        {{ form.art_theme_explanation }}
+                                        {% if form.art_theme_explanation.errors %}<div class="bendy-field-error">{{ form.art_theme_explanation.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Narrativa -->
+                        <div class="chap-form-section">
+                            <h3 class="chap-form-section-title">
+                                <i class="fas fa-scroll me-2"></i> Narrativa
+                            </h3>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.synopsis.id_for_label }}">
+                                            Sinopsis <span class="bendy-required">*</span>
+                                        </label>
+                                        {{ form.synopsis }}
+                                        {% if form.synopsis.errors %}<div class="bendy-field-error">{{ form.synopsis.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.protagonist.id_for_label }}">Protagonista</label>
+                                        {{ form.protagonist }}
+                                        {% if form.protagonist.errors %}<div class="bendy-field-error">{{ form.protagonist.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.main_villain.id_for_label }}">Villano principal</label>
+                                        {{ form.main_villain }}
+                                        {% if form.main_villain.errors %}<div class="bendy-field-error">{{ form.main_villain.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.new_characters_introduced.id_for_label }}">Personajes nuevos introducidos</label>
+                                        {{ form.new_characters_introduced }}
+                                        {% if form.new_characters_introduced.errors %}<div class="bendy-field-error">{{ form.new_characters_introduced.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.key_events.id_for_label }}">Eventos clave</label>
+                                        {{ form.key_events }}
+                                        {% if form.key_events.errors %}<div class="bendy-field-error">{{ form.key_events.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.lore_revelations.id_for_label }}">Revelaciones de lore</label>
+                                        {{ form.lore_revelations }}
+                                        {% if form.lore_revelations.errors %}<div class="bendy-field-error">{{ form.lore_revelations.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.aesthetics.id_for_label }}">Estética</label>
+                                        {{ form.aesthetics }}
+                                        {% if form.aesthetics.errors %}<div class="bendy-field-error">{{ form.aesthetics.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.setting_description.id_for_label }}">Descripción del escenario</label>
+                                        {{ form.setting_description }}
+                                        {% if form.setting_description.errors %}<div class="bendy-field-error">{{ form.setting_description.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Gameplay -->
+                        <div class="chap-form-section">
+                            <h3 class="chap-form-section-title">
+                                <i class="fas fa-gamepad me-2"></i> Gameplay
+                            </h3>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.difficulty.id_for_label }}">Dificultad</label>
+                                        {{ form.difficulty }}
+                                        {% if form.difficulty.errors %}<div class="bendy-field-error">{{ form.difficulty.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.approximate_duration_minutes.id_for_label }}">Duración aprox. (min)</label>
+                                        {{ form.approximate_duration_minutes }}
+                                        {% if form.approximate_duration_minutes.errors %}<div class="bendy-field-error">{{ form.approximate_duration_minutes.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.boss_name.id_for_label }}">Nombre del jefe</label>
+                                        {{ form.boss_name }}
+                                        {% if form.boss_name.errors %}<div class="bendy-field-error">{{ form.boss_name.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <!-- Checkboxes de gameplay -->
+                                <div class="col-12">
+                                    <div class="chap-form-checks">
+                                        <label class="chap-form-check-label">
+                                            {{ form.has_boss_fight }}
+                                            <i class="fas fa-skull me-1"></i> Tiene combate contra jefe
+                                        </label>
+                                        <label class="chap-form-check-label">
+                                            {{ form.has_stealth_sections }}
+                                            <i class="fas fa-eye-slash me-1"></i> Tiene secciones de sigilo
+                                        </label>
+                                        <label class="chap-form-check-label">
+                                            {{ form.has_puzzle_sections }}
+                                            <i class="fas fa-puzzle-piece me-1"></i> Tiene secciones de puzles
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Música -->
+                        <div class="chap-form-section">
+                            <h3 class="chap-form-section-title">
+                                <i class="fas fa-music me-2"></i> Música
+                            </h3>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.composer.id_for_label }}">Compositor</label>
+                                        {{ form.composer }}
+                                        {% if form.composer.errors %}<div class="bendy-field-error">{{ form.composer.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.soundtrack_notes.id_for_label }}">Notas de la banda sonora</label>
+                                        {{ form.soundtrack_notes }}
+                                        {% if form.soundtrack_notes.errors %}<div class="bendy-field-error">{{ form.soundtrack_notes.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Imágenes -->
+                        <div class="chap-form-section">
+                            <h3 class="chap-form-section-title">
+                                <i class="fas fa-image me-2"></i> Imágenes
+                            </h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label">Imagen de portada</label>
+                                        {% if object.cover_image %}
+                                            <div class="game-form-current-img mb-2">
+                                                <img src="{{ object.cover_image.url }}" alt="{{ object.title }}" class="game-form-preview-img">
+                                            </div>
+                                        {% endif %}
+                                        {{ form.cover_image }}
+                                        {% if form.cover_image.errors %}<div class="bendy-field-error">{{ form.cover_image.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label">Imagen de fondo</label>
+                                        {% if object.background_image %}
+                                            <div class="game-form-current-img mb-2">
+                                                <img src="{{ object.background_image.url }}" alt="{{ object.title }}" class="game-form-preview-img">
+                                            </div>
+                                        {% endif %}
+                                        {{ form.background_image }}
+                                        {% if form.background_image.errors %}<div class="bendy-field-error">{{ form.background_image.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Extras -->
+                        <div class="chap-form-section">
+                            <h3 class="chap-form-section-title">
+                                <i class="fas fa-star me-2"></i> Extras
+                            </h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.trivia.id_for_label }}">Curiosidades</label>
+                                        {{ form.trivia }}
+                                        {% if form.trivia.errors %}<div class="bendy-field-error">{{ form.trivia.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-bendy">
+                                        <label class="bendy-label" for="{{ form.reception_notes.id_for_label }}">Notas de recepción</label>
+                                        {{ form.reception_notes }}
+                                        {% if form.reception_notes.errors %}<div class="bendy-field-error">{{ form.reception_notes.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Errores generales -->
+                        {% if form.non_field_errors %}
+                            <div class="bendy-non-field-error mb-3">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Acciones -->
+                        <div class="d-flex gap-3 justify-content-end pt-2">
+                            <a href="{% if object %}{% url 'bendy:chapter_detail' object.slug %}{% else %}{% url 'bendy:chapter_list' %}{% endif %}"
+                               class="bendy-btn bendy-btn-ghost">
+                                <i class="fas fa-times me-2"></i> Cancelar
+                            </a>
+                            <button type="submit" class="bendy-btn bendy-btn-primary" id="chapterFormBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-save me-2"></i>
+                                    {% if object %}Guardar cambios{% else %}Crear capítulo{% endif %}
+                                </span>
+                                <span class="btn-loading d-none">
+                                    <i class="fas fa-spinner fa-spin me-2"></i> Guardando…
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/bendy-chapters.js' %}"></script>
+{% endblock %}

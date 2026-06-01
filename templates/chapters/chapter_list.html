@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Capítulos{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-chapters.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- PAGE HEADER -->
+<div class="chap-page-header">
+    <div class="chap-header-bg"></div>
+    <div class="container position-relative z-1">
+        <div class="d-flex align-items-end justify-content-between flex-wrap gap-3">
+            <div>
+                <div class="page-eyebrow">✦ El Estudio de Tinta ✦</div>
+                <h1 class="chap-header-title">Capítulos</h1>
+                <p class="chap-header-desc">
+                    Cada capítulo, un arte. Explora la historia del Estudio
+                    capítulo a capítulo en ambos universos de Bendy.
+                </p>
+                <div class="chap-game-pills mt-3">
+                    <span class="chap-game-pill chap-game-pill--batim">
+                        <i class="fas fa-film"></i> BATIM
+                        <span class="chap-pill-count">{{ batim_count }}</span>
+                    </span>
+                    <span class="chap-game-pill chap-game-pill--batdr">
+                        <i class="fas fa-moon"></i> BATDR
+                        <span class="chap-pill-count">{{ batdr_count }}</span>
+                    </span>
+                </div>
+            </div>
+            {% if request.user.is_authenticated and request.user.role in 'admin,editor' %}
+                <a href="{% url 'bendy:chapter_create' %}" class="bendy-btn bendy-btn-primary">
+                    <i class="fas fa-plus me-2"></i> Añadir Capítulo
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+
+    <!-- TOOLBAR -->
+    <div class="chap-toolbar">
+        <!-- Búsqueda rápida -->
+        <form method="get" id="quickSearchForm" class="chap-search-form">
+            <div class="chap-search-wrapper">
+                <i class="fas fa-search chap-search-icon"></i>
+                <input type="text"
+                       id="quickSearch"
+                       name="title"
+                       value="{{ request.GET.title }}"
+                       class="bendy-input chap-search-input"
+                       placeholder="Buscar capítulo...">
+                {% if request.GET.title %}
+                    <a href="?" class="chap-search-clear"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </div>
+        </form>
+
+        <div class="chap-toolbar-right">
+            <!-- Botón filtros -->
+            <button class="bendy-btn bendy-btn-outline-sm chap-filter-btn" id="openFilterModal"
+                    aria-expanded="false" aria-controls="filterModal">
+                <i class="fas fa-sliders-h me-2"></i> Filtros
+                {% if has_active_filters %}
+                    <span class="chap-filter-badge">
+                        {{ active_filters|length }}
+                    </span>
+                {% endif %}
+            </button>
+
+            <span class="chap-result-count">
+                {{ total_count }} capítulo{{ total_count|pluralize }}
+            </span>
+
+            {% if has_active_filters %}
+                <a href="{% url 'bendy:chapter_list' %}" class="bendy-btn bendy-btn-outline-sm">
+                    <i class="fas fa-times me-1"></i> Limpiar
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- FILTROS ACTIVOS -->
+    {% if active_filters %}
+        <div class="chap-active-filters mb-4">
+            {% for f in active_filters %}
+                <span class="chap-filter-tag">
+                    {{ f.label }}: <strong>{{ f.value }}</strong>
+                    <a href="?{% for k, v in request.GET.items %}{% if k != f.key and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
+                       class="chap-filter-tag-remove"><i class="fas fa-times"></i></a>
+                </span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- LISTA DE CAPÍTULOS -->
+    {% if chapters %}
+        <div class="chap-list" id="chapterList">
+            {% for chapter in chapters %}
+                <div class="chap-row chap-row--{{ chapter.game.key }}" id="chap-row-{{ chapter.pk }}">
+                    <!-- Número -->
+                    <div class="chap-row-number">
+                        <span class="chap-number-badge chap-number-badge--{{ chapter.game.key }}">
+                            {{ chapter.number }}
+                        </span>
+                    </div>
+
+                    <!-- Thumbnail de portada -->
+                    <div class="chap-row-thumb">
+                        {% if chapter.cover_image %}
+                            <img src="{{ chapter.cover_image.url }}" alt="{{ chapter.title }}" class="chap-thumb-img">
+                        {% else %}
+                            <div class="chap-thumb-placeholder chap-thumb-placeholder--{{ chapter.game.key }}">
+                                <i class="fas fa-{% if chapter.game.key == 'batim' %}film{% else %}moon{% endif %}"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Info principal -->
+                    <div class="chap-row-info">
+                        <div class="chap-row-top">
+                            <span class="chap-game-badge chap-game-badge--{{ chapter.game.key }}">{{ chapter.game.key|upper }}</span>
+                            {% if chapter.art_theme != 'none' %}
+                                <span class="chap-theme-badge">
+                                    <i class="fas fa-palette me-1"></i>{{ chapter.get_art_theme_display }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <h3 class="chap-row-title">
+                            <a href="{% url 'bendy:chapter_detail' chapter.slug %}">{{ chapter.title }}</a>
+                        </h3>
+                        {% if chapter.synopsis %}
+                            <p class="chap-row-synopsis">{{ chapter.synopsis|truncatechars:120 }}</p>
+                        {% endif %}
+                        <div class="chap-row-meta">
+                            {% if chapter.protagonist %}
+                                <span><i class="fas fa-user me-1"></i>{{ chapter.protagonist }}</span>
+                            {% endif %}
+                            {% if chapter.approximate_duration_minutes %}
+                                <span><i class="fas fa-clock me-1"></i>{{ chapter.approximate_duration_minutes }} min</span>
+                            {% endif %}
+                            {% if chapter.release_date %}
+                                <span><i class="fas fa-calendar me-1"></i>{{ chapter.release_date|date:"Y" }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Badges de gameplay -->
+                    <div class="chap-row-badges">
+                        <span class="chap-diff-badge chap-diff-badge--{{ chapter.difficulty }}">
+                            {{ chapter.get_difficulty_display }}
+                        </span>
+                        {% if chapter.has_boss_fight %}
+                            <span class="chap-feat-badge chap-feat-badge--boss" title="Combate contra jefe">
+                                <i class="fas fa-skull"></i>
+                            </span>
+                        {% endif %}
+                        {% if chapter.has_stealth_sections %}
+                            <span class="chap-feat-badge chap-feat-badge--stealth" title="Secciones de sigilo">
+                                <i class="fas fa-eye-slash"></i>
+                            </span>
+                        {% endif %}
+                        {% if chapter.has_puzzle_sections %}
+                            <span class="chap-feat-badge chap-feat-badge--puzzle" title="Secciones de puzles">
+                                <i class="fas fa-puzzle-piece"></i>
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="chap-row-actions">
+                        <a href="{% url 'bendy:chapter_detail' chapter.slug %}"
+                           class="bendy-btn bendy-btn-outline-sm">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if request.user.is_authenticated and request.user.role in 'admin,editor' %}
+                            <a href="{% url 'bendy:chapter_update' chapter.slug %}"
+                               class="bendy-btn bendy-btn-outline-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- PAGINACIÓN -->
+        {% if is_paginated %}
+            <nav class="mt-5 d-flex justify-content-center">
+                <ul class="pagination bendy-pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link bendy-page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link bendy-page-link" href="?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link bendy-page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="chap-empty-state">
+            <div class="chap-empty-icon"><i class="fas fa-layer-group"></i></div>
+            <h3 class="chap-empty-title">Ningún capítulo encontrado</h3>
+            <p class="chap-empty-desc">
+                {% if has_active_filters %}
+                    No hay capítulos que coincidan con los filtros activos.
+                    <a href="{% url 'bendy:chapter_list' %}" class="auth-link">Limpiar filtros</a>
+                {% else %}
+                    El archivo del Estudio aún no contiene capítulos registrados.
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- DRAWER DE FILTROS -->
+<div class="chap-filter-backdrop" id="filterModalBackdrop"></div>
+<aside class="chap-filter-drawer" id="filterModal" aria-label="Filtros">
+    <div class="chap-filter-drawer-header">
+        <h3 class="chap-filter-drawer-title">
+            <i class="fas fa-sliders-h me-2"></i> Filtrar capítulos
+        </h3>
+        <button class="chap-filter-close" id="closeFilterModal" aria-label="Cerrar">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="chap-filter-drawer-body">
+        <form method="get" id="filterForm">
+            <!-- Juego -->
+            <div class="form-group-bendy mb-3">
+                <label class="bendy-label">Juego</label>
+                {{ filterset.form.game }}
+            </div>
+
+            <!-- Tema artístico -->
+            <div class="form-group-bendy mb-3">
+                <label class="bendy-label">Tema artístico</label>
+                {{ filterset.form.art_theme }}
+            </div>
+
+            <!-- Dificultad -->
+            <div class="form-group-bendy mb-3">
+                <label class="bendy-label">Dificultad</label>
+                {{ filterset.form.difficulty }}
+            </div>
+
+            <!-- Ordenar -->
+            <div class="form-group-bendy mb-4">
+                <label class="bendy-label">Ordenar por</label>
+                {{ filterset.form.ordering }}
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="chap-filter-checks mb-4">
+                <label class="chap-filter-check-label">
+                    {{ filterset.form.has_boss_fight }}
+                    <span>Con combate contra jefe</span>
+                </label>
+                <label class="chap-filter-check-label">
+                    {{ filterset.form.has_stealth_sections }}
+                    <span>Con secciones de sigilo</span>
+                </label>
+                <label class="chap-filter-check-label">
+                    {{ filterset.form.has_puzzle_sections }}
+                    <span>Con secciones de puzles</span>
+                </label>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="bendy-btn bendy-btn-primary flex-grow-1">
+                    <i class="fas fa-check me-2"></i> Aplicar
+                </button>
+                <a href="{% url 'bendy:chapter_list' %}" class="bendy-btn bendy-btn-ghost">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</aside>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/bendy-chapters.js' %}"></script>
+{% endblock %}

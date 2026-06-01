@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'django_filters',
     'debug_toolbar',
+    'rest_framework',
 
     # Local apps
     'bendy_app.apps.BendyAppConfig',
@@ -199,3 +200,13 @@ LOGIN_URL: str = "/auth/login/"
 
 # Email (dev)
 EMAIL_BACKEND: str = "django.core.mail.backends.console.EmailBackend"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",  # interfaz web útil en desarrollo
+    ],
+}

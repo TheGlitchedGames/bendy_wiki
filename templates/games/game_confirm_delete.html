@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Eliminar {{ game.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-games.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="bendy-panel bendy-panel-danger">
+                <div class="bendy-panel-header danger-header">
+                    <h2 class="bendy-panel-title" style="color: #e87070;">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Eliminar juego
+                    </h2>
+                </div>
+                <div class="bendy-panel-body text-center">
+                    <div class="game-delete-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <h3 class="game-delete-title">¿Eliminar «{{ object.title }}»?</h3>
+                    <p class="game-delete-warning">
+                        Esta acción es <strong>irreversible</strong>. Se eliminará el juego
+                        y se perderán todos los vínculos con capítulos y personajes asociados.
+                    </p>
+
+                    <!-- Datos del juego a eliminar -->
+                    <div class="game-delete-preview">
+                        {% if object.cover_image %}
+                            <img src="{{ object.cover_image.url }}" alt="{{ object.title }}" class="game-delete-preview-img">
+                        {% else %}
+                            <div class="game-delete-preview-placeholder">
+                                <i class="fas fa-{% if object.key == 'batim' %}film{% else %}moon{% endif %}"></i>
+                            </div>
+                        {% endif %}
+                        <div class="game-delete-preview-info">
+                            <span class="game-entry-key-badge game-entry-key-badge--{{ object.key }} mb-1">{{ object.key|upper }}</span>
+                            <p class="mb-0"><strong>{{ object.title }}</strong></p>
+                            {% if object.release_year %}<small class="text-muted">{{ object.release_year }}</small>{% endif %}
+                        </div>
+                    </div>
+
+                    <form method="post" class="mt-4 d-flex gap-3 justify-content-center">
+                        {% csrf_token %}
+                        <a href="{% url 'bendy:game_detail' object.slug %}"
+                           class="bendy-btn bendy-btn-ghost">
+                            <i class="fas fa-arrow-left me-2"></i> Cancelar
+                        </a>
+                        <button type="submit" class="bendy-btn bendy-btn-danger">
+                            <i class="fas fa-trash me-2"></i> Sí, eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

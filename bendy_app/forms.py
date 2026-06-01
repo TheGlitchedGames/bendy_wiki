@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from bendy_app.models import Character, Chapter
+from bendy_app.models import Character, Chapter, Game
 
 
 class CharacterForm(forms.ModelForm):
@@ -172,3 +172,57 @@ class ChapterForm(forms.ModelForm):
                                           'indica su nombre.'))
 
         return cleaned_data
+
+
+class GameForm(forms.ModelForm):
+    """Formulario para crear y editar juegos."""
+
+    class Meta:
+        model = Game
+        fields = ["key", "title", "slug", "release_year", "short_description",
+                  "cover_image"]
+        widgets = {
+            "key": forms.Select(attrs={"class": "bendy-select"}),
+            "title": forms.TextInput(attrs={
+                "class": "bendy-input",
+                "placeholder": "Ej: Bendy and the Ink Machine",
+            }),
+            "slug": forms.TextInput(attrs={
+                "class": "bendy-input",
+                "placeholder": "bendy-and-the-ink-machine",
+            }),
+            "release_year": forms.NumberInput(attrs={
+                "class": "bendy-input",
+                "placeholder": "Ej: 2017",
+            }),
+            "short_description": forms.Textarea(attrs={
+                "class": "bendy-textarea",
+                "rows": 4,
+                "placeholder": "Descripción breve del juego...",
+            }),
+            "cover_image": forms.FileInput(attrs={"class": "bendy-file-input"}),
+        }
+
+    def clean_slug(self):
+        slug = self.cleaned_data.get("slug", "").strip().lower()
+        qs = Game.objects.filter(slug=slug)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(_("Ya existe un juego con este slug."))
+        return slug
+
+    def clean_key(self):
+        key = self.cleaned_data.get("key", "").strip()
+        qs = Game.objects.filter(key=key)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(_("Ya existe un juego con esta clave."))
+        return key
+
+    def clean_release_year(self):
+        year = self.cleaned_data.get("release_year")
+        if year is not None and (year < 1900 or year > 2100):
+            raise forms.ValidationError(_("Introduce un año válido."))
+        return year

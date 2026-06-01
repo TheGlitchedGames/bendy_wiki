@@ -7,9 +7,10 @@ from django.views.generic import TemplateView, ListView, DetailView, CreateView,
     UpdateView, DeleteView
 
 from bendy_app.filters import CharacterFilter
-from bendy_app.forms import CharacterForm
+from bendy_app.filters.game_chapter_filters import GameFilter, ChapterFilter
+from bendy_app.forms import CharacterForm, GameForm, ChapterForm
 from bendy_app.mixins import BreadcrumbMixin, EditorRequiredMixin
-from bendy_app.models import Game, Character
+from bendy_app.models import Game, Character, Chapter
 
 
 # Home
@@ -244,5 +245,397 @@ class CharacterDeleteView(EditorRequiredMixin, BreadcrumbMixin, DeleteView):
             'Personaje eliminado',
             text=f"«{name}» ha sido borrado del archivo.",
             timer=4000
+        )
+        return response
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GAME VIEWS
+# ══════════════════════════════════════════════════════════════════════════════
+
+class GameListView(BreadcrumbMixin, ListView):
+    """
+    Lista de juegos con filtrado y estadísticas.
+    URL: /games/
+    """
+
+    model = Game
+    template_name = "games/game_list.html"
+    context_object_name = "games"
+    paginate_by = 12
+    breadcrumbs = [
+        {"label": "Inicio", "url": "/"},
+        {"label": "Juegos", "url": None},
+    ]
+
+    def get_queryset(self):
+        qs = Game.objects.all()
+        self.filterset = GameFilter(self.request.GET, queryset=qs)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["filterset"] = self.filterset
+        ctx["total_count"] = self.filterset.qs.count()
+
+        params = self.request.GET.copy()
+        params.pop("page", None)
+        ctx["has_active_filters"] = any(v for v in params.values())
+        return ctx
+
+
+class GameDetailView(BreadcrumbMixin, DetailView):
+    """
+    Detalle de un juego con sus capítulos y personajes.
+    URL: /games/<slug>/
+    """
+
+    model = Game
+    template_name = "games/game_detail.html"
+    context_object_name = "game"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+
+    def get_breadcrumbs(self):
+        return [
+            {"label": "Inicio", "url": "/"},
+            {"label": "Juegos", "url": reverse_lazy("bendy:game_list")},
+            {"label": self.object.title, "url": None},
+        ]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        game: Game = self.object
+
+        ctx["chapters"] = game.chapters.order_by("number")
+        ctx["characters"] = (
+            Character.objects.filter(primary_game=game)
+            .order_by("name")[:12]
+        )
+        ctx["total_characters"] = Character.objects.filter(
+            primary_game=game).count()
+        ctx["total_chapters"] = game.chapters.count()
+
+        # Color temático por juego
+        ctx["game_color"] = {
+            "batim": "#1a1a2e",
+            "batdr": "#4a0e0e",
+        }.get(game.key, "#2c1a0a")
+        ctx["game_accent"] = {
+            "batim": "#aab0e0",
+            "batdr": "#e08080",
+        }.get(game.key, "#d4aa47")
+
+        return ctx
+
+
+class GameCreateView(EditorRequiredMixin, BreadcrumbMixin, SuccessMessageMixin,
+                     CreateView):
+    """
+    Creación de un juego. Solo accesible para editores y admins.
+    URL: /games/crear/
+    """
+
+    model = Game
+    form_class = GameForm
+    template_name = "games/game_form.html"
+    success_message = "¡Juego «%(title)s» añadido al archivo del Estudio!"
+    breadcrumbs = [
+        {"label": "Inicio", "url": "/"},
+        {"label": "Juegos", "url": reverse_lazy("bendy:game_list")},
+        {"label": "Nuevo juego", "url": None},
+    ]
+
+    def get_success_url(self):
+        return reverse_lazy("bendy:game_detail",
+                            kwargs={"slug": self.object.slug})
+
+    def form_invalid(self, form):
+        sweetify.error(
+            self.request,
+            "Error al crear el juego",
+            text="Revisa los campos marcados en rojo.",
+            timer=4000,
+        )
+        return super().form_invalid(form)
+
+
+class GameUpdateView(EditorRequiredMixin, BreadcrumbMixin, SuccessMessageMixin,
+                     UpdateView):
+    """
+    Edición de un juego existente.
+    URL: /games/<slug>/editar/
+    """
+
+    model = Game
+    form_class = GameForm
+    template_name = "games/game_form.html"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+    success_message = "Juego «%(title)s» actualizado correctamente."
+
+    def get_breadcrumbs(self):
+        return [
+            {"label": "Inicio", "url": "/"},
+            {"label": "Juegos", "url": reverse_lazy("bendy:game_list")},
+            {"label": self.object.title,
+             "url": reverse_lazy("bendy:game_detail",
+                                 kwargs={"slug": self.object.slug})},
+            {"label": "Editar", "url": None},
+        ]
+
+    def get_success_url(self):
+        return reverse_lazy("bendy:game_detail",
+                            kwargs={"slug": self.object.slug})
+
+    def form_invalid(self, form):
+        sweetify.error(
+            self.request,
+            "Error al actualizar el juego",
+            text="Revisa los campos marcados en rojo.",
+            timer=4000,
+        )
+        return super().form_invalid(form)
+
+
+class GameDeleteView(EditorRequiredMixin, BreadcrumbMixin, DeleteView):
+    """
+    Eliminación de un juego con confirmación.
+    URL: /games/<slug>/eliminar/
+    """
+
+    model = Game
+    template_name = "games/game_confirm_delete.html"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+    success_url = reverse_lazy("bendy:game_list")
+
+    def get_breadcrumbs(self) -> list[dict[str, Any]]:
+        return [
+            {"label": "Inicio", "url": "/"},
+            {"label": "Juegos", "url": reverse_lazy("bendy:game_list")},
+            {"label": self.object.title,
+             "url": reverse_lazy("bendy:game_detail",
+                                 kwargs={"slug": self.object.slug})},
+            {"label": "Eliminar", "url": None},
+        ]
+
+    def post(self, request, *args, **kwargs):
+        title = self.get_object().title
+        response = super().post(request, *args, **kwargs)
+        sweetify.success(
+            request,
+            "Juego eliminado",
+            text=f"«{title}» ha sido borrado del archivo.",
+            timer=4000,
+        )
+        return response
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CHAPTER VIEWS
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ChapterListView(BreadcrumbMixin, ListView):
+    """
+    Lista paginada de capítulos con filtrado.
+    URL: /chapters/
+    """
+
+    model = Chapter
+    template_name = "chapters/chapter_list.html"
+    context_object_name = "chapters"
+    paginate_by = 10
+    breadcrumbs = [
+        {"label": "Inicio", "url": "/"},
+        {"label": "Capítulos", "url": None},
+    ]
+
+    def get_queryset(self):
+        qs = Chapter.objects.select_related("game").order_by("game", "number")
+        self.filterset = ChapterFilter(self.request.GET, queryset=qs)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["filterset"] = self.filterset
+        ctx["total_count"] = self.filterset.qs.count()
+        ctx["active_filters"] = self._get_active_filters()
+
+        ctx["batim_count"] = Chapter.objects.filter(game__key="batim").count()
+        ctx["batdr_count"] = Chapter.objects.filter(game__key="batdr").count()
+
+        params = self.request.GET.copy()
+        params.pop("page", None)
+        ctx["has_active_filters"] = any(v for v in params.values())
+        return ctx
+
+    def _get_active_filters(self) -> list[dict]:
+        labels = {
+            "title": "Título",
+            "game": "Juego",
+            "art_theme": "Tema",
+            "difficulty": "Dificultad",
+            "has_boss_fight": "Con jefe",
+            "has_stealth_sections": "Sigilo",
+            "has_puzzle_sections": "Puzles",
+            "ordering": "Orden",
+        }
+        return [
+            {"key": k, "label": l, "value": self.request.GET.get(k, "")}
+            for k, l in labels.items()
+            if self.request.GET.get(k, "")
+        ]
+
+
+class ChapterDetailView(BreadcrumbMixin, DetailView):
+    """
+    Detalle de un capítulo.
+    URL: /chapters/<slug>/
+    """
+
+    model = Chapter
+    template_name = "chapters/chapter_detail.html"
+    context_object_name = "chapter"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+
+    def get_breadcrumbs(self):
+        return [
+            {"label": "Inicio", "url": "/"},
+            {"label": "Capítulos", "url": reverse_lazy("bendy:chapter_list")},
+            {"label": self.object.full_title, "url": None},
+        ]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        chapter: Chapter = self.object
+
+        # Navegación entre capítulos del mismo juego
+        siblings = Chapter.objects.filter(game=chapter.game).order_by("number")
+        numbers = list(siblings.values_list("number", flat=True))
+        idx = numbers.index(chapter.number)
+        ctx["prev_chapter"] = siblings[idx - 1] if idx > 0 else None
+        ctx["next_chapter"] = siblings[idx + 1] if idx < len(
+            numbers) - 1 else None
+
+        ctx["game_color"] = {
+            "batim": "#1a1a2e",
+            "batdr": "#4a0e0e",
+        }.get(chapter.game.key, "#2c1a0a")
+        ctx["game_accent"] = {
+            "batim": "#aab0e0",
+            "batdr": "#e08080",
+        }.get(chapter.game.key, "#d4aa47")
+
+        ctx["difficulty_color"] = {
+            "introductory": "#27ae60",
+            "easy": "#2ecc71",
+            "medium": "#f39c12",
+            "hard": "#e67e22",
+            "boss_heavy": "#c0392b",
+        }.get(chapter.difficulty, "#7f8c8d")
+
+        return ctx
+
+
+class ChapterCreateView(EditorRequiredMixin, BreadcrumbMixin,
+                        SuccessMessageMixin, CreateView):
+    """
+    Creación de un capítulo. Solo accesible para editores y admins.
+    URL: /chapters/crear/
+    """
+
+    model = Chapter
+    form_class = ChapterForm
+    template_name = "chapters/chapter_form.html"
+    success_message = "¡Capítulo «%(title)s» creado con éxito en el archivo del Estudio!"
+    breadcrumbs = [
+        {"label": "Inicio", "url": "/"},
+        {"label": "Capítulos", "url": reverse_lazy("bendy:chapter_list")},
+        {"label": "Nuevo capítulo", "url": None},
+    ]
+
+    def get_success_url(self):
+        return reverse_lazy("bendy:chapter_detail",
+                            kwargs={"slug": self.object.slug})
+
+    def form_invalid(self, form):
+        sweetify.error(
+            self.request,
+            "Error al crear el capítulo",
+            text="Revisa los campos marcados en rojo.",
+            timer=4000,
+        )
+        return super().form_invalid(form)
+
+
+class ChapterUpdateView(EditorRequiredMixin, BreadcrumbMixin,
+                        SuccessMessageMixin, UpdateView):
+    """
+    Edición de un capítulo existente.
+    URL: /chapters/<slug>/editar/
+    """
+
+    model = Chapter
+    form_class = ChapterForm
+    template_name = "chapters/chapter_form.html"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+    success_message = "Capítulo «%(title)s» actualizado correctamente."
+
+    def get_breadcrumbs(self):
+        return [
+            {"label": "Inicio", "url": "/"},
+            {"label": "Capítulos", "url": reverse_lazy("bendy:chapter_list")},
+            {"label": self.object.full_title,
+             "url": reverse_lazy("bendy:chapter_detail",
+                                 kwargs={"slug": self.object.slug})},
+            {"label": "Editar", "url": None},
+        ]
+
+    def get_success_url(self):
+        return reverse_lazy("bendy:chapter_detail",
+                            kwargs={"slug": self.object.slug})
+
+    def form_invalid(self, form):
+        sweetify.error(
+            self.request,
+            "Error al actualizar el capítulo",
+            text="Revisa los campos marcados en rojo.",
+            timer=4000,
+        )
+        return super().form_invalid(form)
+
+
+class ChapterDeleteView(EditorRequiredMixin, BreadcrumbMixin, DeleteView):
+    """
+    Eliminación de un capítulo con confirmación.
+    URL: /chapters/<slug>/eliminar/
+    """
+
+    model = Chapter
+    template_name = "chapters/chapter_confirm_delete.html"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+    success_url = reverse_lazy("bendy:chapter_list")
+
+    def get_breadcrumbs(self) -> list[dict[str, Any]]:
+        return [
+            {"label": "Inicio", "url": "/"},
+            {"label": "Capítulos", "url": reverse_lazy("bendy:chapter_list")},
+            {"label": self.object.full_title,
+             "url": reverse_lazy("bendy:chapter_detail",
+                                 kwargs={"slug": self.object.slug})},
+            {"label": "Eliminar", "url": None},
+        ]
+
+    def post(self, request, *args, **kwargs):
+        title = self.get_object().full_title
+        response = super().post(request, *args, **kwargs)
+        sweetify.success(
+            request,
+            "Capítulo eliminado",
+            text=f"«{title}» ha sido borrado del archivo.",
+            timer=4000,
         )
         return response

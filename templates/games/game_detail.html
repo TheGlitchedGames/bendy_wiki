@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ game.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-games.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- HERO DEL JUEGO -->
+<div class="game-detail-hero" style="--game-color: {{ game_color }}; --game-accent: {{ game_accent }};">
+    <div class="game-detail-hero-bg"></div>
+    {% if game.cover_image %}
+        <div class="game-detail-hero-img-bg"
+             style="background-image: url('{{ game.cover_image.url }}');"></div>
+    {% endif %}
+
+    <div class="container position-relative z-1 py-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="game-breadcrumb">
+                <li><a href="{% url 'bendy:index' %}">Inicio</a></li>
+                <li><i class="fas fa-chevron-right"></i></li>
+                <li><a href="{% url 'bendy:game_list' %}">Juegos</a></li>
+                <li><i class="fas fa-chevron-right"></i></li>
+                <li class="active">{{ game.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="game-detail-hero-content">
+            <!-- Portada -->
+            <div class="game-detail-cover">
+                {% if game.cover_image %}
+                    <img src="{{ game.cover_image.url }}"
+                         alt="{{ game.title }}"
+                         class="game-detail-cover-img">
+                {% else %}
+                    <div class="game-detail-cover-placeholder">
+                        <i class="fas fa-{% if game.key == 'batim' %}film{% else %}moon{% endif %}"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="game-detail-intro">
+                <span class="game-detail-key-badge game-detail-key-badge--{{ game.key }}">
+                    {{ game.key|upper }}
+                </span>
+                <h1 class="game-detail-title">{{ game.title }}</h1>
+                {% if game.release_year %}
+                    <p class="game-detail-year">
+                        <i class="fas fa-calendar-alt me-2"></i>{{ game.release_year }}
+                    </p>
+                {% endif %}
+                {% if game.short_description %}
+                    <p class="game-detail-desc">{{ game.short_description }}</p>
+                {% endif %}
+
+                <!-- Quick facts -->
+                <dl class="game-detail-quickfacts">
+                    <div class="game-qf-item">
+                        <dt><i class="fas fa-layer-group me-1"></i> Capítulos</dt>
+                        <dd>{{ total_chapters }}</dd>
+                    </div>
+                    <div class="game-qf-item">
+                        <dt><i class="fas fa-users me-1"></i> Personajes</dt>
+                        <dd>{{ total_characters }}</dd>
+                    </div>
+                </dl>
+
+                <!-- Acciones del editor -->
+                {% if request.user.is_authenticated and request.user.role in 'admin,editor' %}
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="{% url 'bendy:game_update' game.slug %}"
+                           class="bendy-btn bendy-btn-secondary">
+                            <i class="fas fa-edit me-2"></i> Editar
+                        </a>
+                        <a href="{% url 'bendy:game_delete' game.slug %}"
+                           class="bendy-btn bendy-btn-danger">
+                            <i class="fas fa-trash me-2"></i> Eliminar
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+
+        <!-- COLUMNA PRINCIPAL -->
+        <div class="col-lg-8">
+
+            <!-- Capítulos -->
+            <section class="game-section mb-5">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h2 class="game-section-title">
+                        <i class="fas fa-layer-group me-2"></i> Capítulos
+                    </h2>
+                    <a href="{% url 'bendy:chapter_list' %}?game={{ game.pk }}"
+                       class="bendy-btn bendy-btn-outline-sm">Ver todos</a>
+                </div>
+
+                {% if chapters %}
+                    <div class="game-chapters-list">
+                        {% for chapter in chapters %}
+                            <a href="{% url 'bendy:chapter_detail' chapter.slug %}"
+                               class="game-chapter-row">
+                                <span class="game-chapter-number">{{ chapter.number }}</span>
+                                <div class="game-chapter-info">
+                                    <span class="game-chapter-title">{{ chapter.title }}</span>
+                                    <span class="game-chapter-meta">
+                                        {% if chapter.art_theme != 'none' %}
+                                            <i class="fas fa-palette me-1"></i>{{ chapter.get_art_theme_display }}
+                                        {% endif %}
+                                        {% if chapter.approximate_duration_minutes %}
+                                            <i class="fas fa-clock me-1 ms-2"></i>{{ chapter.approximate_duration_minutes }} min
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="game-chapter-badges">
+                                    {% if chapter.has_boss_fight %}
+                                        <span class="game-chapter-badge game-chapter-badge--boss">
+                                            <i class="fas fa-skull"></i>
+                                        </span>
+                                    {% endif %}
+                                    <span class="game-chapter-badge game-chapter-badge--diff-{{ chapter.difficulty }}">
+                                        {{ chapter.get_difficulty_display }}
+                                    </span>
+                                </div>
+                                <i class="fas fa-chevron-right game-chapter-arrow"></i>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="game-empty-state-sm">
+                        <i class="fas fa-layer-group"></i>
+                        <span>No hay capítulos registrados aún.</span>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- Personajes -->
+            <section class="game-section">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h2 class="game-section-title">
+                        <i class="fas fa-users me-2"></i> Personajes
+                        {% if total_characters > 12 %}
+                            <span class="game-section-count">{{ total_characters }}</span>
+                        {% endif %}
+                    </h2>
+                    <a href="{% url 'bendy:character_list' %}?primary_game={{ game.pk }}"
+                       class="bendy-btn bendy-btn-outline-sm">Ver todos</a>
+                </div>
+
+                {% if characters %}
+                    <div class="game-characters-grid">
+                        {% for character in characters %}
+                            <a href="{% url 'bendy:character_detail' character.slug %}"
+                               class="game-char-card">
+                                <div class="game-char-avatar">
+                                    {% if character.image %}
+                                        <img src="{{ character.image.url }}" alt="{{ character.name }}">
+                                    {% else %}
+                                        <i class="fas fa-user-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="game-char-name">{{ character.name }}</span>
+                                <span class="game-char-role game-char-role--{{ character.role }}">
+                                    {{ character.get_role_display }}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="game-empty-state-sm">
+                        <i class="fas fa-users"></i>
+                        <span>No hay personajes registrados aún.</span>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="col-lg-4">
+            <aside class="game-sidebar-card">
+                <h3 class="game-sidebar-title">
+                    <i class="fas fa-info-circle me-2"></i> Ficha del Juego
+                </h3>
+                <ul class="game-sidebar-list">
+                    <li>
+                        <span class="game-sidebar-label">Clave</span>
+                        <span class="game-sidebar-value">{{ game.key|upper }}</span>
+                    </li>
+                    {% if game.release_year %}
+                        <li>
+                            <span class="game-sidebar-label">Año</span>
+                            <span class="game-sidebar-value">{{ game.release_year }}</span>
+                        </li>
+                    {% endif %}
+                    <li>
+                        <span class="game-sidebar-label">Capítulos</span>
+                        <span class="game-sidebar-value">{{ total_chapters }}</span>
+                    </li>
+                    <li>
+                        <span class="game-sidebar-label">Personajes</span>
+                        <span class="game-sidebar-value">{{ total_characters }}</span>
+                    </li>
+                </ul>
+
+                {% if request.user.is_authenticated and request.user.role in 'admin,editor' %}
+                    <div class="mt-4 d-flex flex-column gap-2">
+                        <a href="{% url 'bendy:chapter_create' %}"
+                           class="bendy-btn bendy-btn-ghost bendy-btn-full">
+                            <i class="fas fa-plus me-2"></i> Añadir capítulo
+                        </a>
+                        <a href="{% url 'bendy:character_create' %}"
+                           class="bendy-btn bendy-btn-ghost bendy-btn-full">
+                            <i class="fas fa-plus me-2"></i> Añadir personaje
+                        </a>
+                    </div>
+                {% endif %}
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/bendy-games.js' %}"></script>
+{% endblock %}

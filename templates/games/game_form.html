@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Editar {{ object.title }}{% else %}Nuevo Juego{% endif %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-games.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="bendy-panel">
+                <div class="bendy-panel-header">
+                    <h2 class="bendy-panel-title">
+                        <i class="fas fa-{% if object %}edit{% else %}plus{% endif %} me-2"></i>
+                        {% if object %}Editar «{{ object.title }}»{% else %}Añadir nuevo juego{% endif %}
+                    </h2>
+                </div>
+                <div class="bendy-panel-body">
+                    <form method="post" enctype="multipart/form-data" novalidate id="gameForm">
+                        {% csrf_token %}
+
+                        <!-- Clave / Slug -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="form-group-bendy">
+                                    <label class="bendy-label" for="{{ form.key.id_for_label }}">
+                                        Clave del juego <span class="bendy-required">*</span>
+                                    </label>
+                                    {{ form.key }}
+                                    {% if form.key.errors %}
+                                        <div class="bendy-field-error">{{ form.key.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="bendy-help">Identificador corto (batim / batdr)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group-bendy">
+                                    <label class="bendy-label" for="{{ form.slug.id_for_label }}">
+                                        Slug <span class="bendy-required">*</span>
+                                    </label>
+                                    {{ form.slug }}
+                                    {% if form.slug.errors %}
+                                        <div class="bendy-field-error">{{ form.slug.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="bendy-help">Identificador único para la URL</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Título / Año -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <div class="form-group-bendy">
+                                    <label class="bendy-label" for="{{ form.title.id_for_label }}">
+                                        Título completo <span class="bendy-required">*</span>
+                                    </label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="bendy-field-error">{{ form.title.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group-bendy">
+                                    <label class="bendy-label" for="{{ form.release_year.id_for_label }}">
+                                        Año de lanzamiento
+                                    </label>
+                                    {{ form.release_year }}
+                                    {% if form.release_year.errors %}
+                                        <div class="bendy-field-error">{{ form.release_year.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="form-group-bendy mb-3">
+                            <label class="bendy-label" for="{{ form.short_description.id_for_label }}">
+                                Descripción corta
+                            </label>
+                            {{ form.short_description }}
+                            {% if form.short_description.errors %}
+                                <div class="bendy-field-error">{{ form.short_description.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Portada -->
+                        <div class="form-group-bendy mb-4">
+                            <label class="bendy-label">
+                                Imagen de portada
+                            </label>
+                            {% if object.cover_image %}
+                                <div class="game-form-current-img mb-2">
+                                    <img src="{{ object.cover_image.url }}" alt="{{ object.title }}" class="game-form-preview-img">
+                                    <span class="game-form-img-label">Imagen actual</span>
+                                </div>
+                            {% endif %}
+                            {{ form.cover_image }}
+                            {% if form.cover_image.errors %}
+                                <div class="bendy-field-error">{{ form.cover_image.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Errores generales -->
+                        {% if form.non_field_errors %}
+                            <div class="bendy-non-field-error mb-3">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Acciones -->
+                        <div class="d-flex gap-3 justify-content-end pt-2">
+                            <a href="{% if object %}{% url 'bendy:game_detail' object.slug %}{% else %}{% url 'bendy:game_list' %}{% endif %}"
+                               class="bendy-btn bendy-btn-ghost">
+                                <i class="fas fa-times me-2"></i> Cancelar
+                            </a>
+                            <button type="submit" class="bendy-btn bendy-btn-primary" id="gameFormBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-save me-2"></i>
+                                    {% if object %}Guardar cambios{% else %}Crear juego{% endif %}
+                                </span>
+                                <span class="btn-loading d-none">
+                                    <i class="fas fa-spinner fa-spin me-2"></i> Guardando…
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/bendy-games.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ chapter.full_title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bendy-chapters.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- HERO DEL CAPÍTULO -->
+<div class="chap-detail-hero chap-detail-hero--{{ chapter.game.key }}"
+     style="--game-color: {{ game_color }}; --game-accent: {{ game_accent }}; --diff-color: {{ difficulty_color }};">
+    {% if chapter.background_image %}
+        <div class="chap-detail-hero-bg-img"
+             style="background-image: url('{{ chapter.background_image.url }}');"></div>
+    {% endif %}
+    <div class="chap-detail-hero-overlay"></div>
+
+    <div class="container position-relative z-1 py-5">
+        <!-- Navegación entre capítulos -->
+        <div class="chap-nav-bar mb-4">
+            {% if prev_chapter %}
+                <a href="{% url 'bendy:chapter_detail' prev_chapter.slug %}" class="chap-nav-btn">
+                    <i class="fas fa-chevron-left me-1"></i> Cap. {{ prev_chapter.number }}
+                </a>
+            {% else %}
+                <span class="chap-nav-btn chap-nav-btn--disabled">
+                    <i class="fas fa-chevron-left me-1"></i> Anterior
+                </span>
+            {% endif %}
+
+            <a href="{% url 'bendy:chapter_list' %}" class="chap-nav-btn chap-nav-btn--center">
+                <i class="fas fa-th-list me-1"></i> Todos los capítulos
+            </a>
+
+            {% if next_chapter %}
+                <a href="{% url 'bendy:chapter_detail' next_chapter.slug %}" class="chap-nav-btn">
+                    Cap. {{ next_chapter.number }} <i class="fas fa-chevron-right ms-1"></i>
+                </a>
+            {% else %}
+                <span class="chap-nav-btn chap-nav-btn--disabled">
+                    Siguiente <i class="fas fa-chevron-right ms-1"></i>
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="chap-detail-hero-content">
+            <!-- Portada -->
+            <div class="chap-detail-cover">
+                {% if chapter.cover_image %}
+                    <img src="{{ chapter.cover_image.url }}" alt="{{ chapter.title }}" class="chap-detail-cover-img">
+                {% else %}
+                    <div class="chap-detail-cover-placeholder chap-detail-cover-placeholder--{{ chapter.game.key }}">
+                        <span class="chap-detail-cover-num">{{ chapter.number }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Intro -->
+            <div class="chap-detail-intro">
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="chap-game-badge chap-game-badge--{{ chapter.game.key }}">{{ chapter.game.key|upper }}</span>
+                    <span class="chap-diff-badge chap-diff-badge--{{ chapter.difficulty }}" style="border-color: {{ difficulty_color }};">
+                        {{ chapter.get_difficulty_display }}
+                    </span>
+                    {% if chapter.art_theme != 'none' %}
+                        <span class="chap-theme-badge">
+                            <i class="fas fa-palette me-1"></i>{{ chapter.get_art_theme_display }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="chap-detail-number">Capítulo {{ chapter.number }}</div>
+                <h1 class="chap-detail-title">{{ chapter.title }}</h1>
+
+                <!-- Gameplay pills -->
+                <div class="chap-feat-pills mt-3">
+                    {% if chapter.has_boss_fight %}
+                        <span class="chap-feat-pill chap-feat-pill--boss">
+                            <i class="fas fa-skull me-1"></i> Boss Fight
+                            {% if chapter.boss_name %}: {{ chapter.boss_name }}{% endif %}
+                        </span>
+                    {% endif %}
+                    {% if chapter.has_stealth_sections %}
+                        <span class="chap-feat-pill chap-feat-pill--stealth">
+                            <i class="fas fa-eye-slash me-1"></i> Sigilo
+                        </span>
+                    {% endif %}
+                    {% if chapter.has_puzzle_sections %}
+                        <span class="chap-feat-pill chap-feat-pill--puzzle">
+                            <i class="fas fa-puzzle-piece me-1"></i> Puzles
+                        </span>
+                    {% endif %}
+                    {% if chapter.approximate_duration_minutes %}
+                        <span class="chap-feat-pill">
+                            <i class="fas fa-clock me-1"></i> ~{{ chapter.approximate_duration_minutes }} min
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Acciones del editor -->
+                {% if request.user.is_authenticated and request.user.role in 'admin,editor' %}
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="{% url 'bendy:chapter_update' chapter.slug %}"
+                           class="bendy-btn bendy-btn-secondary">
+                            <i class="fas fa-edit me-2"></i> Editar
+                        </a>
+                        <a href="{% url 'bendy:chapter_delete' chapter.slug %}"
+                           class="bendy-btn bendy-btn-danger">
+                            <i class="fas fa-trash me-2"></i> Eliminar
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+
+        <!-- COLUMNA PRINCIPAL -->
+        <div class="col-lg-8">
+
+            <!-- Sinopsis -->
+            {% if chapter.synopsis %}
+                <section class="chap-content-section mb-4">
+                    <h2 class="chap-content-title">
+                        <i class="fas fa-scroll me-2"></i> Sinopsis
+                    </h2>
+                    <div class="chap-prose">{{ chapter.synopsis|linebreaks }}</div>
+                </section>
+            {% endif %}
+
+            <!-- Estética y ambientación -->
+            {% if chapter.aesthetics or chapter.setting_description %}
+                <section class="chap-content-section mb-4">
+                    <h2 class="chap-content-title">
+                        <i class="fas fa-eye me-2"></i> Estética y Ambientación
+                    </h2>
+                    {% if chapter.aesthetics %}
+                        <div class="chap-prose mb-3">{{ chapter.aesthetics|linebreaks }}</div>
+                    {% endif %}
+                    {% if chapter.setting_description %}
+                        <div class="chap-prose">{{ chapter.setting_description|linebreaks }}</div>
+                    {% endif %}
+                </section>
+            {% endif %}
+
+            <!-- Tema artístico -->
+            {% if chapter.art_theme != 'none' and chapter.art_theme_explanation %}
+                <section class="chap-content-section chap-art-section mb-4">
+                    <h2 class="chap-content-title">
+                        <i class="fas fa-palette me-2"></i> Tema Artístico: {{ chapter.get_art_theme_display }}
+                    </h2>
+                    <div class="chap-prose">{{ chapter.art_theme_explanation|linebreaks }}</div>
+                </section>
+            {% endif %}
+
+            <!-- Eventos clave -->
+            {% if chapter.key_events %}
+                <section class="chap-content-section mb-4">
+                    <h2 class="chap-content-title">
+                        <i class="fas fa-star me-2"></i> Eventos Clave
+                    </h2>
+                    <div class="chap-prose">{{ chapter.key_events|linebreaks }}</div>
+                </section>
+            {% endif %}
+
+            <!-- Revelaciones de lore -->
+            {% if chapter.lore_revelations %}
+                <section class="chap-content-section mb-4">
+                    <h2 class="chap-content-title">
+                        <i class="fas fa-book me-2"></i> Revelaciones de Lore
+                    </h2>
+                    <div class="chap-prose">{{ chapter.lore_revelations|linebreaks }}</div>
+                </section>
+            {% endif %}
+
+            <!-- Música -->
+            {% if chapter.soundtrack_notes %}
+                <section class="chap-content-section chap-music-section mb-4">
+                    <h2 class="chap-content-title">
+                        <i class="fas fa-music me-2"></i> Banda Sonora
+                        {% if chapter.composer %}
+                            <span class="chap-composer-tag">{{ chapter.composer }}</span>
+                        {% endif %}
+                    </h2>
+                    <div class="chap-prose">{{ chapter.soundtrack_notes|linebreaks }}</div>
+                </section>
+            {% endif %}
+
+            <!-- Trivia -->
+            {% if chapter.trivia %}
+                <section class="chap-content-section mb-4">
+                    <h2 class="chap-content-title">
+                        <i class="fas fa-lightbulb me-2"></i> Curiosidades
+                    </h2>
+                    <div class="chap-prose">{{ chapter.trivia|linebreaks }}</div>
+                </section>
+            {% endif %}
+
+            <!-- Recepción -->
+            {% if chapter.reception_notes %}
+                <section class="chap-content-section mb-4">
+                    <h2 class="chap-content-title">
+                        <i class="fas fa-comments me-2"></i> Recepción
+                    </h2>
+                    <div class="chap-prose">{{ chapter.reception_notes|linebreaks }}</div>
+                </section>
+            {% endif %}
+
+            <!-- Navegación inferior -->
+            <div class="chap-bottom-nav mt-5">
+                {% if prev_chapter %}
+                    <a href="{% url 'bendy:chapter_detail' prev_chapter.slug %}" class="chap-bottom-nav-btn chap-bottom-nav-btn--prev">
+                        <i class="fas fa-arrow-left"></i>
+                        <div>
+                            <span class="chap-bottom-nav-label">Capítulo anterior</span>
+                            <span class="chap-bottom-nav-title">{{ prev_chapter.title }}</span>
+                        </div>
+                    </a>
+                {% else %}
+                    <div></div>
+                {% endif %}
+                {% if next_chapter %}
+                    <a href="{% url 'bendy:chapter_detail' next_chapter.slug %}" class="chap-bottom-nav-btn chap-bottom-nav-btn--next">
+                        <div>
+                            <span class="chap-bottom-nav-label">Capítulo siguiente</span>
+                            <span class="chap-bottom-nav-title">{{ next_chapter.title }}</span>
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="col-lg-4">
+            <!-- Ficha rápida -->
+            <aside class="chap-sidebar-card mb-4">
+                <h3 class="chap-sidebar-title">
+                    <i class="fas fa-info-circle me-2"></i> Ficha del Capítulo
+                </h3>
+                <ul class="chap-sidebar-list">
+                    <li>
+                        <span class="chap-sidebar-label">Juego</span>
+                        <a href="{% url 'bendy:game_detail' chapter.game.slug %}"
+                           class="chap-sidebar-value chap-sidebar-link">
+                            {{ chapter.game.title }}
+                        </a>
+                    </li>
+                    <li>
+                        <span class="chap-sidebar-label">Número</span>
+                        <span class="chap-sidebar-value">{{ chapter.number }}</span>
+                    </li>
+                    <li>
+                        <span class="chap-sidebar-label">Dificultad</span>
+                        <span class="chap-sidebar-value" style="color: {{ difficulty_color }};">
+                            {{ chapter.get_difficulty_display }}
+                        </span>
+                    </li>
+                    {% if chapter.protagonist %}
+                        <li>
+                            <span class="chap-sidebar-label">Protagonista</span>
+                            <span class="chap-sidebar-value">{{ chapter.protagonist }}</span>
+                        </li>
+                    {% endif %}
+                    {% if chapter.main_villain %}
+                        <li>
+                            <span class="chap-sidebar-label">Villano principal</span>
+                            <span class="chap-sidebar-value">{{ chapter.main_villain }}</span>
+                        </li>
+                    {% endif %}
+                    {% if chapter.approximate_duration_minutes %}
+                        <li>
+                            <span class="chap-sidebar-label">Duración aprox.</span>
+                            <span class="chap-sidebar-value">{{ chapter.approximate_duration_minutes }} min</span>
+                        </li>
+                    {% endif %}
+                    {% if chapter.release_date %}
+                        <li>
+                            <span class="chap-sidebar-label">Lanzamiento</span>
+                            <span class="chap-sidebar-value">{{ chapter.release_date|date:"d/m/Y" }}</span>
+                        </li>
+                    {% endif %}
+                    {% if chapter.last_update_date %}
+                        <li>
+                            <span class="chap-sidebar-label">Última actualización</span>
+                            <span class="chap-sidebar-value">{{ chapter.last_update_date|date:"d/m/Y" }}</span>
+                        </li>
+                    {% endif %}
+                    {% if chapter.composer %}
+                        <li>
+                            <span class="chap-sidebar-label">Compositor</span>
+                            <span class="chap-sidebar-value">{{ chapter.composer }}</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </aside>
+
+            <!-- Gameplay -->
+            <aside class="chap-sidebar-card chap-sidebar-card--gameplay mb-4">
+                <h3 class="chap-sidebar-title">
+                    <i class="fas fa-gamepad me-2"></i> Gameplay
+                </h3>
+                <div class="chap-gameplay-grid">
+                    <div class="chap-gameplay-item {% if chapter.has_boss_fight %}chap-gameplay-item--on{% endif %}">
+                        <i class="fas fa-skull"></i>
+                        <span>Boss Fight</span>
+                    </div>
+                    <div class="chap-gameplay-item {% if chapter.has_stealth_sections %}chap-gameplay-item--on{% endif %}">
+                        <i class="fas fa-eye-slash"></i>
+                        <span>Sigilo</span>
+                    </div>
+                    <div class="chap-gameplay-item {% if chapter.has_puzzle_sections %}chap-gameplay-item--on{% endif %}">
+                        <i class="fas fa-puzzle-piece"></i>
+                        <span>Puzles</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Nuevos personajes -->
+            {% if chapter.new_characters_introduced %}
+                <aside class="chap-sidebar-card mb-4">
+                    <h3 class="chap-sidebar-title">
+                        <i class="fas fa-user-plus me-2"></i> Personajes nuevos
+                    </h3>
+                    <p class="chap-sidebar-prose">{{ chapter.new_characters_introduced }}</p>
+                </aside>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/bendy-chapters.js' %}"></script>
+{% endblock %}

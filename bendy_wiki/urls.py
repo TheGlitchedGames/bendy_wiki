@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('bendy_app.urls', namespace='bendy')),
     path('', include('auth_app.urls')),
+    path("api/", include("bendy_app.api_urls")),
 ]
 
 if settings.DEBUG:
