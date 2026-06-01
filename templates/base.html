@@ -52,14 +52,14 @@
             <!-- Navegación central -->
             <ul class="bendy-nav-links d-none d-lg-flex">
                 <li><a href="{% url 'bendy:index' %}" class="bendy-nav-link">Inicio</a></li>
-                <li><a href="#" class="bendy-nav-link">BATIM</a></li>
-                <li><a href="#" class="bendy-nav-link">BATDR</a></li>
+                <li><a href="{% url 'bendy:game_list' %}" class="bendy-nav-link">BATIM</a></li>
+                <li><a href="{% url 'bendy:game_list' %}" class="bendy-nav-link">BATDR</a></li>
                 <li>
                     <a href="{% url 'bendy:character_list' %}" class="bendy-nav-link">
                         Personajes
                     </a>
                 </li>
-                <li><a href="#" class="bendy-nav-link">Capítulos</a></li>
+                <li><a href="{% url 'bendy:chapter_list' %}" class="bendy-nav-link">Capítulos</a></li>
                 <li>
                     <a href="{% url 'auth:user_list' %}" class="bendy-nav-link">Comunidad</a>
                 </li>
