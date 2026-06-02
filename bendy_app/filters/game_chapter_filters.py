@@ -31,12 +31,20 @@ class GameFilter(django_filters.FilterSet):
             ("title", "title"),
         ),
         label=_("Ordenar por"),
-        widget=forms.Select(attrs={"class": "bendy-select"}),
+        # ❌ sin widget aquí
     )
 
     class Meta:
         model = Game
         fields = ["title", "release_year"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # ✅ Aplicar clases CSS correctamente
+        self.form.fields["ordering"].widget.attrs.update({
+            "class": "bendy-select"
+        })
 
 
 # ── Chapter Filter ─────────────────────────────────────────────────────────────
@@ -55,19 +63,16 @@ class ChapterFilter(django_filters.FilterSet):
         queryset=Game.objects.all(),
         label=_("Juego"),
         empty_label=_("Todos los juegos"),
-        widget=forms.Select(attrs={"class": "bendy-select"}),
     )
 
     art_theme = django_filters.ChoiceFilter(
         choices=[("", _("Todos los temas"))] + Chapter.ART_THEME_CHOICES,
         label=_("Tema artístico"),
-        widget=forms.Select(attrs={"class": "bendy-select"}),
     )
 
     difficulty = django_filters.ChoiceFilter(
         choices=[("", _("Todas las dificultades"))] + Chapter.DIFFICULTY_CHOICES,
         label=_("Dificultad"),
-        widget=forms.Select(attrs={"class": "bendy-select"}),
     )
 
     has_boss_fight = django_filters.BooleanFilter(
@@ -93,7 +98,6 @@ class ChapterFilter(django_filters.FilterSet):
             ("approximate_duration_minutes", "approximate_duration_minutes"),
         ),
         label=_("Ordenar por"),
-        widget=forms.Select(attrs={"class": "bendy-select"}),
     )
 
     class Meta:
@@ -102,3 +106,15 @@ class ChapterFilter(django_filters.FilterSet):
             "title", "game", "art_theme", "difficulty",
             "has_boss_fight", "has_stealth_sections", "has_puzzle_sections",
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # ✅ Aplicar clases a selects
+        select_fields = ["game", "art_theme", "difficulty", "ordering"]
+
+        for field in select_fields:
+            if field in self.form.fields:
+                self.form.fields[field].widget.attrs.update({
+                    "class": "bendy-select"
+                })
